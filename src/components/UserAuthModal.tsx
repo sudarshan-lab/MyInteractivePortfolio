@@ -34,30 +34,54 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-dark-200 rounded-lg w-full max-w-md relative overflow-hidden"
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        className="bg-dark-200 rounded-lg w-full max-w-md relative overflow-hidden border border-dark-400/30 shadow-xl"
       >
-        <div className="absolute top-2 right-2">
-          <button
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="absolute top-2 right-2"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 hover:bg-dark-300 rounded-full transition-colors"
+            className="p-2 hover:bg-dark-300/50 rounded-full transition-colors"
           >
-            <X size={20} />
-          </button>
-        </div>
+            <X size={20} className="text-gray-400" />
+          </motion.button>
+        </motion.div>
 
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Welcome to Discussions</h2>
-          <p className="text-gray-400 mb-6">Please enter your details to continue</p>
+          <motion.h2 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-xl font-semibold mb-2 bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
+          >
+            Welcome to Discussions
+          </motion.h2>
+          <motion.p 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-400 mb-6"
+          >
+            Please enter your details to continue
+          </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Name</label>
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <label className="block text-sm font-medium mb-2 text-gray-300">Name</label>
               <div className="relative">
                 <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -65,18 +89,22 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={cn(
-                    "w-full bg-dark-300 border border-dark-400 rounded-lg",
+                    "w-full bg-dark-300/50 border border-dark-400/30 rounded-lg",
                     "pl-10 pr-4 py-2",
-                    "focus:outline-none focus:ring-2 focus:ring-primary-500",
-                    "placeholder:text-gray-500"
+                    "focus:outline-none focus:ring-2 focus:ring-primary-500/50",
+                    "placeholder:text-gray-500 text-gray-200"
                   )}
                   placeholder="Enter your name"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <label className="block text-sm font-medium mb-2 text-gray-300">Email</label>
               <div className="relative">
                 <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -84,26 +112,37 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={cn(
-                    "w-full bg-dark-300 border border-dark-400 rounded-lg",
+                    "w-full bg-dark-300/50 border border-dark-400/30 rounded-lg",
                     "pl-10 pr-4 py-2",
-                    "focus:outline-none focus:ring-2 focus:ring-primary-500",
-                    "placeholder:text-gray-500"
+                    "focus:outline-none focus:ring-2 focus:ring-primary-500/50",
+                    "placeholder:text-gray-500 text-gray-200"
                   )}
                   placeholder="Enter your email"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {error && (
-              <p className="text-red-500 text-sm">{error}</p>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-red-500 text-sm"
+              >
+                {error}
+              </motion.p>
             )}
 
-            <button
+            <motion.button
               type="submit"
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg transition-colors"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white py-2 rounded-lg transition-all duration-300 shadow-lg"
             >
               Continue
-            </button>
+            </motion.button>
           </form>
         </div>
       </motion.div>

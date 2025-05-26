@@ -45,7 +45,13 @@ const DUMMY_MESSAGES: Message[] = [
   }
 ];
 
-const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // hash of 'password'
+const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+
+const messageVariants = {
+  initial: { opacity: 0, y: 20, scale: 0.95 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, scale: 0.95 }
+};
 
 const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,7 +66,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   useEffect(() => {
     if (userData) {
-      // Simulate API call
       setTimeout(() => {
         setMessages(DUMMY_MESSAGES);
       }, 1000);
@@ -136,99 +141,143 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-dark-100/95 backdrop-blur-md z-50 flex flex-col"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 bg-gradient-to-br from-dark-100 via-dark-200 to-dark-300 backdrop-blur-lg z-50 flex flex-col"
     >
-      <div className="flex items-center justify-between p-4 border-b border-dark-300">
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-sm bg-dark-100/80"
+      >
         <div className="flex items-center gap-4">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 hover:bg-dark-300 rounded-full transition-colors"
+            className="p-2 hover:bg-dark-300/50 rounded-full transition-colors"
           >
-            <ArrowLeft size={20} />
-          </button>
-          <h2 className="text-xl font-semibold">Discussions</h2>
+            <ArrowLeft size={20} className="text-primary-400" />
+          </motion.button>
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+            Discussions
+          </h2>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-300 rounded-full">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-dark-300/50 rounded-full border border-dark-400/30"
+          >
             <User size={16} className="text-primary-400" />
-            <span className="text-sm">{userData.name}</span>
-          </div>
-          <button
+            <span className="text-sm text-gray-200">{userData.name}</span>
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowPrivateKeyModal(true)}
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors",
+              "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300",
               isAuthenticated 
-                ? "bg-primary-600/20 text-primary-400"
-                : "bg-dark-300 hover:bg-dark-400"
+                ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+                : "bg-dark-300/50 hover:bg-dark-400/50 border border-dark-400/30"
             )}
           >
             <Lock size={16} />
             {isAuthenticated ? 'Authenticated' : 'Private Access'}
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {filteredMessages.map((msg) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={cn(
-              "p-4 rounded-lg",
-              msg.isPrivate 
-                ? "bg-primary-600/20 border border-primary-500/20" 
-                : "bg-dark-300/50 border border-dark-400/20",
-              msg.email === userData.email && "ml-auto max-w-[80%]"
-            )}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-medium">{msg.sender}</span>
-              {msg.isPrivate && <Lock size={14} className="text-primary-400" />}
-              <span className="text-sm text-gray-400">
-                {new Date(msg.timestamp).toLocaleString()}
-              </span>
-            </div>
-            <p className="text-gray-200 break-words">{msg.content}</p>
-          </motion.div>
-        ))}
+        <AnimatePresence initial={false}>
+          {filteredMessages.map((msg, index) => (
+            <motion.div
+              key={msg.id}
+              variants={messageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className={cn(
+                "max-w-[80%] break-words",
+                msg.email === userData.email ? "ml-auto" : "mr-auto"
+              )}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium text-gray-400">{msg.sender}</span>
+                {msg.isPrivate && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="bg-primary-600/20 p-1 rounded-full"
+                  >
+                    <Lock size={12} className="text-primary-400" />
+                  </motion.div>
+                )}
+              </div>
+              <div
+                className={cn(
+                  "p-4 rounded-2xl shadow-lg backdrop-blur-sm",
+                  msg.email === userData.email
+                    ? "bg-gradient-to-br from-primary-600/90 to-primary-700/90 text-white"
+                    : msg.isPrivate
+                    ? "bg-gradient-to-br from-primary-600/20 to-primary-700/20 border border-primary-500/20"
+                    : "bg-dark-300/50 border border-dark-400/20"
+                )}
+              >
+                <p className="text-gray-100">{msg.content}</p>
+                <span className="text-xs text-gray-400 mt-2 block">
+                  {new Date(msg.timestamp).toLocaleString()}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-dark-300 bg-dark-200">
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="p-4 border-t border-dark-300/50 bg-dark-200/80 backdrop-blur-sm"
+      >
         <div className="flex gap-2">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setIsPrivate(!isPrivate)}
             className={cn(
-              "p-2 rounded-full transition-colors",
+              "p-2 rounded-full transition-all duration-300",
               isPrivate 
-                ? "bg-primary-600/20 text-primary-400" 
-                : "bg-dark-300 hover:bg-dark-400"
+                ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+                : "bg-dark-300/50 hover:bg-dark-400/50 border border-dark-400/30"
             )}
             title={isPrivate ? "Private Message" : "Public Message"}
           >
             {isPrivate ? <Lock size={20} /> : <Users size={20} />}
-          </button>
+          </motion.button>
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 bg-dark-300/50 border border-dark-400/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none h-10 max-h-32"
+            className="flex-1 bg-dark-300/50 border border-dark-400/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
             style={{ height: 'auto' }}
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="p-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:hover:bg-primary-600 rounded-full transition-colors"
+            className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg"
           >
-            <Send size={20} />
-          </button>
+            <Send size={20} className="text-white" />
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {showPrivateKeyModal && (
@@ -236,35 +285,41 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-dark-200 p-6 rounded-lg w-full max-w-md"
+              className="bg-dark-200 p-6 rounded-lg w-full max-w-md border border-dark-400/30 shadow-xl"
             >
-              <h3 className="text-lg font-semibold mb-4">Enter Private Key</h3>
+              <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+                Enter Private Key
+              </h3>
               <input
                 type="password"
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
-                className="w-full bg-dark-300 border border-dark-400 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full bg-dark-300/50 border border-dark-400/30 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 placeholder:text-gray-500"
                 placeholder="Enter private key..."
               />
               <div className="flex justify-end gap-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowPrivateKeyModal(false)}
-                  className="px-4 py-2 bg-dark-300 hover:bg-dark-400 rounded-lg transition-colors"
+                  className="px-4 py-2 bg-dark-300/50 hover:bg-dark-400/50 rounded-lg transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handlePrivateKeySubmit}
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                  className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-lg transition-colors shadow-lg"
                 >
                   Submit
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
