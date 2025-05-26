@@ -48,19 +48,7 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-700/10" />
         
-        <div className="absolute top-2 right-2">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
-          >
-            <X size={20} className="text-gray-400" />
-            <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Close Dialog
-            </div>
-          </motion.button>
-        </div>
+       
 
         <div className="p-6 relative">
           <motion.div 
@@ -70,6 +58,16 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
           >
             <MessageSquare size={24} className="text-white" />
           </motion.div>
+          <motion.div className="absolute top-2 right-2 cursor-pointer">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="p-2 hover:bg-white/5 rounded-full transition-colors group cursor-pointer relative"
+          >
+            <X size={20} className="text-gray-400" />
+          </motion.button>
+        </motion.div>
 
           <motion.h2 
             initial={{ y: -20, opacity: 0 }}

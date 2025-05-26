@@ -37,7 +37,7 @@ const ChatInterface: React.FC = () => {
     z-10
   "
 >
-  <div className="flex items-center space-x-2 sm:space-x-3" onClick={handleRefresh}>
+  <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={handleRefresh}>
     <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
       <MessageSquare size={18} className="text-white" />
     </div>
