@@ -21,7 +21,7 @@ interface UserData {
   email: string;
 }
 
-const PRIVATE_KEY_HASH = import.meta.env.VITE_HASH;
+const PRIVATE_KEY_HASH = "0493c7033ca5cb1ec5f2972093dc9c977d4c1fc0a160308e4c232d4f8e9e65e1";
 
 const messageVariants = {
   initial: { opacity: 0, x: -20 },
