@@ -31,52 +31,90 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   const isLastStep = currentStep === steps.length - 1;
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [arrowPosition, setArrowPosition] = useState('bottom');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const updatePosition = () => {
-      if (step.targetElement) {
-        const element = document.querySelector(step.targetElement);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          const viewportWidth = window.innerWidth;
-          const tooltipHeight = 200; // Approximate height of tooltip
-          
-          let top, left;
-          let newArrowPosition;
-
-          // Force position based on step preference
-          if (step.position === 'top') {
-            top = rect.top - tooltipHeight - 20;
-            newArrowPosition = 'bottom';
-          } else {
-            top = rect.bottom + 20;
-            newArrowPosition = 'top';
-          }
-
-          // Center horizontally
-          left = rect.left + (rect.width / 2) - 150; // 300px is tooltip width
-
-          // Adjust if tooltip would go off screen
-          if (left < 20) left = 20;
-          if (left + 300 > viewportWidth) left = viewportWidth - 320;
-
-          setTooltipPosition({ top, left });
-          setArrowPosition(newArrowPosition);
-        }
-      } else {
-        // Center in viewport if no target
+      if (!step.targetElement) {
         setTooltipPosition({
           top: '50%',
           left: '50%'
         });
         setArrowPosition('none');
+        return;
       }
+
+      const element = document.querySelector(step.targetElement);
+      if (!element) return;
+
+      const rect = element.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const tooltipHeight = 200; // Approximate height of tooltip
+      const tooltipWidth = isMobile ? viewportWidth - 40 : 300; // Full width on mobile minus padding
+      
+      let top, left;
+      let newArrowPosition;
+
+      if (isMobile) {
+        // Mobile positioning
+        if (rect.top > viewportHeight / 2) {
+          // If element is in bottom half, show tooltip above
+          top = Math.max(20, rect.top - tooltipHeight - 20);
+          newArrowPosition = 'bottom';
+        } else {
+          // If element is in top half, show tooltip below
+          top = Math.min(viewportHeight - tooltipHeight - 20, rect.bottom + 20);
+          newArrowPosition = 'top';
+        }
+        left = 20; // 20px padding from edges
+      } else {
+        // Desktop positioning
+        if (step.position === 'top') {
+          top = rect.top - tooltipHeight - 20;
+          newArrowPosition = 'bottom';
+        } else {
+          top = rect.bottom + 20;
+          newArrowPosition = 'top';
+        }
+
+        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+
+        // Keep tooltip within viewport bounds
+        if (left < 20) left = 20;
+        if (left + tooltipWidth > viewportWidth - 20) {
+          left = viewportWidth - tooltipWidth - 20;
+        }
+
+        // Ensure tooltip is not too close to top or bottom of viewport
+        if (top < 20) top = 20;
+        if (top + tooltipHeight > viewportHeight - 20) {
+          top = viewportHeight - tooltipHeight - 20;
+        }
+      }
+
+      setTooltipPosition({ top, left });
+      setArrowPosition(newArrowPosition);
     };
 
     updatePosition();
     window.addEventListener('resize', updatePosition);
-    return () => window.removeEventListener('resize', updatePosition);
-  }, [step, currentStep]);
+    window.addEventListener('scroll', updatePosition);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
+    };
+  }, [step, currentStep, isMobile]);
 
   return (
     <AnimatePresence>
@@ -96,12 +134,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
               position: 'absolute',
               top: typeof tooltipPosition.top === 'number' ? `${tooltipPosition.top}px` : tooltipPosition.top,
               left: typeof tooltipPosition.left === 'number' ? `${tooltipPosition.left}px` : tooltipPosition.left,
-              transform: arrowPosition === 'none' ? 'translate(-50%, -50%)' : 'none'
+              transform: arrowPosition === 'none' ? 'translate(-50%, -50%)' : 'none',
+              width: isMobile ? 'calc(100% - 40px)' : '300px'
             }}
-            className="bg-dark-200 rounded-lg p-6 w-[300px] border border-white/10 shadow-xl"
+            className="bg-dark-200 rounded-lg p-6 border border-white/10 shadow-xl"
           >
             {/* Arrow */}
-            {arrowPosition !== 'none' && (
+            {arrowPosition !== 'none' && !isMobile && (
               <div
                 className={`absolute w-4 h-4 bg-dark-200 transform rotate-45 ${
                   arrowPosition === 'top' ? '-top-2' : '-bottom-2'
