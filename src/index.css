@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --scrollbar-thumb: #4b5563;
+  --scrollbar-track: #1f2937;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  @apply bg-gradient-to-br from-dark-100 via-dark-200 to-dark-300 text-gray-200 font-sans antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-100;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-gradient-to-r from-dark-300 to-dark-400 hover:from-dark-400 hover:to-dark-500 text-white focus:ring-dark-400;
+  }
+  
+  .chip {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-all duration-200;
+  }
+  
+  .chat-bubble {
+    @apply rounded-2xl px-4 py-3 shadow-lg backdrop-blur-sm;
+  }
+  
+  .chat-bubble-user {
+    @apply bg-gradient-to-br from-primary-600 to-primary-700 text-white;
+  }
+  
+  .chat-bubble-ai {
+    @apply bg-gradient-to-br from-dark-300/90 to-dark-400/90 text-gray-100;
+  }
+  
+  .markdown {
+    @apply prose prose-invert max-w-none;
+  }
+  
+  .markdown p {
+    @apply mb-4 leading-relaxed;
+  }
+  
+  .markdown ul {
+    @apply mb-4 list-disc pl-5;
+  }
+  
+  .markdown h1 {
+    @apply text-2xl font-bold mb-4;
+  }
+  
+  .markdown h2 {
+    @apply text-xl font-bold mb-3;
+  }
+  
+  .markdown h3 {
+    @apply text-lg font-bold mb-2;
+  }
+  
+  .markdown a {
+    @apply text-primary-400 hover:underline;
+  }
+  
+  .markdown pre {
+    @apply my-4 p-4 bg-dark-200/50 backdrop-blur-sm rounded-md overflow-auto;
+  }
+  
+  .markdown code {
+    @apply bg-dark-200/50 backdrop-blur-sm px-1.5 py-0.5 rounded text-sm;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-200%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+}
