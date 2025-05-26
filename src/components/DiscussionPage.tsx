@@ -232,7 +232,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <Lock size={16} />
               {isAuthenticated ? 'Authenticated' : 'Private Access'}
-              <Tooltip content={isAuthenticated ? "Already Authenticated" : "Access Private Messages"} />
             </motion.button>
           </div>
         </motion.div>
