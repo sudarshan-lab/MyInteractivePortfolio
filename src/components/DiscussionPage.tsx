@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Lock, Send, Users, ArrowLeft, User } from 'lucide-react';
 import { cn } from '../utils/cn';
+import UserAuthModal from './UserAuthModal';
 
 interface Message {
   id: string;
   content: string;
   sender: string;
+  email: string;
   timestamp: Date;
   isPrivate: boolean;
+}
+
+interface UserData {
+  name: string;
+  email: string;
 }
 
 const DUMMY_MESSAGES: Message[] = [
@@ -16,6 +23,7 @@ const DUMMY_MESSAGES: Message[] = [
     id: '1',
     content: "Hey everyone! What's your favorite programming language?",
     sender: "Alice",
+    email: "alice@example.com",
     timestamp: new Date('2024-03-10T10:00:00'),
     isPrivate: false
   },
@@ -23,6 +31,7 @@ const DUMMY_MESSAGES: Message[] = [
     id: '2',
     content: "I'm working on a React project, anyone interested in collaborating?",
     sender: "Bob",
+    email: "bob@example.com",
     timestamp: new Date('2024-03-10T11:30:00'),
     isPrivate: false
   },
@@ -30,12 +39,13 @@ const DUMMY_MESSAGES: Message[] = [
     id: '3',
     content: "Private message about the project details.",
     sender: "Charlie",
+    email: "charlie@example.com",
     timestamp: new Date('2024-03-10T12:15:00'),
     isPrivate: true
   }
 ];
 
-const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // This is a hash of 'password'
+const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // hash of 'password'
 
 const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,13 +54,22 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [privateKey, setPrivateKey] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPrivateKeyModal, setShowPrivateKeyModal] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setMessages(DUMMY_MESSAGES);
-    }, 1000);
-  }, []);
+    if (userData) {
+      // Simulate API call
+      setTimeout(() => {
+        setMessages(DUMMY_MESSAGES);
+      }, 1000);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const hashString = async (str: string) => {
     const encoder = new TextEncoder();
@@ -71,12 +90,13 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !userData) return;
 
     const newMsg: Message = {
       id: Math.random().toString(),
       content: newMessage,
-      sender: 'You',
+      sender: userData.name,
+      email: userData.email,
       timestamp: new Date(),
       isPrivate: isPrivate
     };
@@ -85,15 +105,40 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setNewMessage('');
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleUserAuth = (name: string, email: string) => {
+    setUserData({ name, email });
+    setShowAuthModal(false);
+  };
+
   const filteredMessages = messages.filter(msg => 
     !msg.isPrivate || (msg.isPrivate && isAuthenticated)
   );
 
+  if (!userData) {
+    return (
+      <AnimatePresence>
+        {showAuthModal && (
+          <UserAuthModal
+            onClose={onClose}
+            onSubmit={handleUserAuth}
+          />
+        )}
+      </AnimatePresence>
+    );
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 bg-dark-100/95 backdrop-blur-md z-50 flex flex-col"
     >
       <div className="flex items-center justify-between p-4 border-b border-dark-300">
@@ -106,18 +151,24 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </button>
           <h2 className="text-xl font-semibold">Discussions</h2>
         </div>
-        <button
-          onClick={() => setShowPrivateKeyModal(true)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-full transition-colors",
-            isAuthenticated 
-              ? "bg-primary-600/20 text-primary-400"
-              : "bg-dark-300 hover:bg-dark-400"
-          )}
-        >
-          <Lock size={16} />
-          {isAuthenticated ? 'Authenticated' : 'Private Access'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-dark-300 rounded-full">
+            <User size={16} className="text-primary-400" />
+            <span className="text-sm">{userData.name}</span>
+          </div>
+          <button
+            onClick={() => setShowPrivateKeyModal(true)}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors",
+              isAuthenticated 
+                ? "bg-primary-600/20 text-primary-400"
+                : "bg-dark-300 hover:bg-dark-400"
+            )}
+          >
+            <Lock size={16} />
+            {isAuthenticated ? 'Authenticated' : 'Private Access'}
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -130,7 +181,8 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               "p-4 rounded-lg",
               msg.isPrivate 
                 ? "bg-primary-600/20 border border-primary-500/20" 
-                : "bg-dark-300/50 border border-dark-400/20"
+                : "bg-dark-300/50 border border-dark-400/20",
+              msg.email === userData.email && "ml-auto max-w-[80%]"
             )}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -140,9 +192,10 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {new Date(msg.timestamp).toLocaleString()}
               </span>
             </div>
-            <p className="text-gray-200">{msg.content}</p>
+            <p className="text-gray-200 break-words">{msg.content}</p>
           </motion.div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 border-t border-dark-300 bg-dark-200">
@@ -155,15 +208,17 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 ? "bg-primary-600/20 text-primary-400" 
                 : "bg-dark-300 hover:bg-dark-400"
             )}
+            title={isPrivate ? "Private Message" : "Public Message"}
           >
             {isPrivate ? <Lock size={20} /> : <Users size={20} />}
           </button>
-          <input
-            type="text"
+          <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 bg-dark-300/50 border border-dark-400/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-1 bg-dark-300/50 border border-dark-400/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none h-10 max-h-32"
+            style={{ height: 'auto' }}
           />
           <button
             onClick={handleSendMessage}
@@ -181,13 +236,13 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-dark-200 p-6 rounded-lg w-full max-w-md mx-4"
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-dark-200 p-6 rounded-lg w-full max-w-md"
             >
               <h3 className="text-lg font-semibold mb-4">Enter Private Key</h3>
               <input
