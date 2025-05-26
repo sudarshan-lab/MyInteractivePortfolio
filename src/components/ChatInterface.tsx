@@ -16,6 +16,11 @@ const ChatInterface: React.FC = () => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleRefresh = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <>
       <div className="flex flex-col h-screen">
@@ -25,7 +30,7 @@ const ChatInterface: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="mt-28 sm:mt-0 flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-md bg-dark-100/95 z-10"
         >
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.location.reload()}>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={handleRefresh}>
             <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
               <MessageSquare size={20} className="text-white" />
             </div>
