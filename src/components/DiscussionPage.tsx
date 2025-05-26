@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X } from 'lucide-react';
+import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X, MessageCircle, Shield } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
+import TutorialOverlay from './TutorialOverlay';
 
 interface Message {
   id: string;
@@ -53,6 +54,24 @@ const messageVariants = {
   exit: { opacity: 0, x: -20 }
 };
 
+const discussionTutorialSteps = [
+  {
+    title: 'Welcome to Discussions',
+    description: 'This is where you can interact with other developers and share your thoughts.',
+    icon: <MessageCircle size={16} className="text-white" />
+  },
+  {
+    title: 'Private Messages',
+    description: 'Toggle private messages visibility and access authenticated content.',
+    icon: <Shield size={16} className="text-white" />
+  },
+  {
+    title: 'Join the Conversation',
+    description: 'Use the message input below to start engaging with the community.',
+    icon: <MessageSquare size={16} className="text-white" />
+  }
+];
+
 const Tooltip: React.FC<{ content: string }> = ({ content }) => (
   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
     {content}
@@ -76,6 +95,10 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [showPrivateMessages, setShowPrivateMessages] = useState(() => {
     return localStorage.getItem('showPrivateMessages') !== 'false';
   });
+  const [showTutorial, setShowTutorial] = useState(() => {
+    return !localStorage.getItem('discussionTutorialCompleted');
+  });
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -145,6 +168,15 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setShowAuthModal(false);
   };
 
+  const completeTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem('discussionTutorialCompleted', 'true');
+  };
+
+  const handleNextTutorialStep = () => {
+    setCurrentTutorialStep(prev => prev + 1);
+  };
+
   const filteredMessages = messages.filter(msg => 
     !msg.isPrivate || (msg.isPrivate && isAuthenticated && showPrivateMessages)
   );
@@ -178,225 +210,236 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gradient-to-br from-dark-100/95 to-dark-300/95 backdrop-blur-xl z-50 flex flex-col"
-    >
-      <motion.div 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-gradient-to-br from-dark-100/95 to-dark-300/95 backdrop-blur-xl z-50 flex flex-col"
       >
-        <div className="flex items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
-          >
-            <ArrowLeft size={20} className="text-primary-400" />
-            <Tooltip content="Back to Portfolio" />
-          </motion.button>
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-            Community Discussions
-          </h2>
-        </div>
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
+        >
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+            >
+              <ArrowLeft size={20} className="text-primary-400" />
+              <Tooltip content="Back to Portfolio" />
+            </motion.button>
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+              Community Discussions
+            </h2>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {isAuthenticated && (
+          <div className="flex items-center gap-3">
+            {isAuthenticated && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowPrivateMessages(!showPrivateMessages)}
+                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
+              >
+                {showPrivateMessages ? (
+                  <Eye size={20} className="text-primary-400" />
+                ) : (
+                  <EyeOff size={20} className="text-gray-400" />
+                )}
+                <Tooltip content={showPrivateMessages ? "Hide Private Messages" : "Show Private Messages"} />
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-              className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
-            >
-              {showPrivateMessages ? (
-                <Eye size={20} className="text-primary-400" />
-              ) : (
-                <EyeOff size={20} className="text-gray-400" />
+              onClick={() => setShowPrivateKeyModal(true)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 group relative",
+                isAuthenticated 
+                  ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+                  : "bg-white/5 hover:bg-white/10 border border-white/10"
               )}
-              <Tooltip content={showPrivateMessages ? "Hide Private Messages" : "Show Private Messages"} />
-            </motion.button>
-          )}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowPrivateKeyModal(true)}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 group relative",
-              isAuthenticated 
-                ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-                : "bg-white/5 hover:bg-white/10 border border-white/10"
-            )}
-          >
-            <Lock size={16} />
-            {isAuthenticated ? 'Authenticated' : 'Private Access'}
-            <Tooltip content={isAuthenticated ? "Already Authenticated" : "Access Private Messages"} />
-          </motion.button>
-        </div>
-      </motion.div>
-
-      <div className="flex-1 overflow-y-auto p-4">
-        <AnimatePresence initial={false}>
-          {filteredMessages.map((msg, index) => {
-            const showDate = index === 0 || 
-              formatDate(msg.timestamp) !== formatDate(filteredMessages[index - 1].timestamp);
-
-            return (
-              <React.Fragment key={msg.id}>
-                {showDate && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex justify-center my-4"
-                  >
-                    <span className="text-xs text-gray-400 bg-dark-200/50 px-3 py-1 rounded-full">
-                      {formatDate(msg.timestamp)}
-                    </span>
-                  </motion.div>
-                )}
-                <motion.div
-                  variants={messageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.2 }}
-                  className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
-                >
-                  <div className="absolute left-4 top-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
-                      {msg.sender[0].toUpperCase()}
-                    </div>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-white group relative">
-                      {msg.sender}
-                      <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-dark-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                        {msg.email}
-                      </div>
-                    </span>
-                    <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
-                    {msg.isPrivate && (
-                      <div className="group relative">
-                        <Lock size={12} className="text-primary-400" />
-                        <Tooltip content="Private Message" />
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-gray-200 mt-1">{msg.content}</p>
-                </motion.div>
-              </React.Fragment>
-            );
-          })}
-        </AnimatePresence>
-        <div ref={messagesEndRef} />
-      </div>
-
-      <motion.div 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
-      >
-        <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsPrivate(!isPrivate)}
-            className={cn(
-              "p-2 rounded-full transition-all duration-300 group relative",
-              isPrivate 
-                ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-                : "bg-white/5 hover:bg-white/10 border border-white/10"
-            )}
-          >
-            {isPrivate ? <Lock size={20} /> : <Users size={20} />}
-            <Tooltip content={isPrivate ? "Private Message" : "Public Message"} />
-          </motion.button>
-          <textarea
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
-            style={{ height: 'auto' }}
-          />
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
-            className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg group relative"
-          >
-            <Send size={20} className="text-white" />
-            <Tooltip content="Send Message" />
-          </motion.button>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {showPrivateKeyModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-dark-200 p-6 rounded-lg w-full max-w-md border border-white/10 shadow-xl"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-                  Enter Private Key
-                </h3>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowPrivateKeyModal(false)}
-                  className="p-1 hover:bg-white/5 rounded-full transition-colors"
-                >
-                  <X size={20} className="text-gray-400" />
-                </motion.button>
-              </div>
-              <input
-                type="password"
-                value={privateKey}
-                onChange={(e) => setPrivateKey(e.target.value)}
-                className={cn(
-                  "w-full bg-white/5 border border-white/10 rounded-lg",
-                  "px-4 py-2 mb-4",
-                  "focus:outline-none focus:ring-2 focus:ring-primary-500/50",
-                  "placeholder:text-gray-500 text-gray-200"
-                )}
-                placeholder="Enter private key..."
-              />
-              <div className="flex justify-end gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowPrivateKeyModal(false)}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handlePrivateKeySubmit}
-                  className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-lg transition-colors shadow-lg"
-                >
-                  Submit
-                </motion.button>
-              </div>
+              <Lock size={16} />
+              {isAuthenticated ? 'Authenticated' : 'Private Access'}
+              <Tooltip content={isAuthenticated ? "Already Authenticated" : "Access Private Messages"} />
+            </motion.button>
+          </div>
+        </motion.div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <AnimatePresence initial={false}>
+            {filteredMessages.map((msg, index) => {
+              const showDate = index === 0 || 
+                formatDate(msg.timestamp) !== formatDate(filteredMessages[index - 1].timestamp);
+
+              return (
+                <React.Fragment key={msg.id}>
+                  {showDate && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-center my-4"
+                    >
+                      <span className="text-xs text-gray-400 bg-dark-200/50 px-3 py-1 rounded-full">
+                        {formatDate(msg.timestamp)}
+                      </span>
+                    </motion.div>
+                  )}
+                  <motion.div
+                    variants={messageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.2 }}
+                    className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    <div className="absolute left-4 top-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
+                        {msg.sender[0].toUpperCase()}
+                      </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-medium text-white group relative">
+                        {msg.sender}
+                        <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-dark-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          {msg.email}
+                        </div>
+                      </span>
+                      <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
+                      {msg.isPrivate && (
+                        <div className="group relative">
+                          <Lock size={12} className="text-primary-400" />
+                          <Tooltip content="Private Message" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-200 mt-1">{msg.content}</p>
+                  </motion.div>
+                </React.Fragment>
+              );
+            })}
+          </AnimatePresence>
+          <div ref={messagesEndRef} />
+        </div>
+
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
+        >
+          <div className="flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsPrivate(!isPrivate)}
+              className={cn(
+                "p-2 rounded-full transition-all duration-300 group relative",
+                isPrivate 
+                  ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+                  : "bg-white/5 hover:bg-white/10 border border-white/10"
+              )}
+            >
+              {isPrivate ? <Lock size={20} /> : <Users size={20} />}
+              <Tooltip content={isPrivate ? "Private Message" : "Public Message"} />
+            </motion.button>
+            <textarea
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message..."
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
+              style={{ height: 'auto' }}
+            />
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim()}
+              className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg group relative"
+            >
+              <Send size={20} className="text-white" />
+              <Tooltip content="Send Message" />
+            </motion.button>
+          </div>
+        </motion.div>
+
+        <AnimatePresence>
+          {showPrivateKeyModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-dark-200 p-6 rounded-lg w-full max-w-md border border-white/10 shadow-xl"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+                    Enter Private Key
+                  </h3>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowPrivateKeyModal(false)}
+                    className="p-1 hover:bg-white/5 rounded-full transition-colors"
+                  >
+                    <X size={20} className="text-gray-400" />
+                  </motion.button>
+                </div>
+                <input
+                  type="password"
+                  value={privateKey}
+                  onChange={(e) => setPrivateKey(e.target.value)}
+                  className={cn(
+                    "w-full bg-white/5 border border-white/10 rounded-lg",
+                    "px-4 py-2 mb-4",
+                    "focus:outline-none focus:ring-2 focus:ring-primary-500/50",
+                    "placeholder:text-gray-500 text-gray-200"
+                  )}
+                  placeholder="Enter private key..."
+                />
+                <div className="flex justify-end gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPrivateKeyModal(false)}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handlePrivateKeySubmit}
+                    className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-lg transition-colors shadow-lg"
+                  >
+                    Submit
+                  </motion.button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <TutorialOverlay
+        isOpen={showTutorial}
+        onClose={completeTutorial}
+        currentStep={currentTutorialStep}
+        onNextStep={handleNextTutorialStep}
+        onSkip={completeTutorial}
+        steps={discussionTutorialSteps}
+      />
+    </>
   );
 };
 
