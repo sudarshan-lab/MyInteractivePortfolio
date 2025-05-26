@@ -5,6 +5,7 @@ import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils'; 
+import Notification from './Notification';
 
 interface Message {
   id: string;
@@ -45,7 +46,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [showPrivateMessages, setShowPrivateMessages] = useState(() => {
     return localStorage.getItem('showPrivateMessages') !== 'false';
   });
-  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,6 +77,15 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   const hashString = async (str: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
@@ -89,8 +99,15 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (hashedKey === PRIVATE_KEY_HASH) {
       setIsAuthenticated(true);
       setShowPrivateKeyModal(false);
+      setNotification({
+        type: 'success',
+        message: 'Successfully authenticated for private access'
+      });
     } else {
-      alert('Invalid private key');
+      setNotification({
+        type: 'error',
+        message: 'Invalid private key'
+      });
     }
   };
 
@@ -113,14 +130,18 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setNewMessage('');
 
       if (isPrivate) {
-        setShowAcknowledgment(true);
-        setTimeout(() => setShowAcknowledgment(false), 3000);
+        setNotification({
+          type: 'success',
+          message: 'Private message sent successfully'
+        });
       }
     } catch (err) {
-      alert('Failed to send message!');
+      setNotification({
+        type: 'error',
+        message: 'Failed to send message'
+      });
     }
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -305,22 +326,8 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl relative"
+          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
         >
-          <AnimatePresence>
-            {showAcknowledgment && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 px-4 py-2 bg-primary-600/20 border border-primary-500/30 rounded-lg text-primary-400 flex items-center gap-2"
-              >
-                <Lock size={14} />
-                Private message sent successfully
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <div className="flex gap-2">
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -414,6 +421,16 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </motion.div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {notification && (
+            <Notification
+              type={notification.type}
+              message={notification.message}
+              onClose={() => setNotification(null)}
+            />
           )}
         </AnimatePresence>
       </motion.div>
