@@ -101,7 +101,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "flex items-start gap-3 relative",
+        "flex items-start gap-3",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -110,16 +110,13 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-500 to-secondary-700 flex items-center justify-center flex-shrink-0 mt-1 absolute left-0 top-0"
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-500 to-secondary-700 flex items-center justify-center flex-shrink-0 mt-1"
         >
           <Bot size={18} className="text-white" />
         </motion.div>
       )}
       
-      <div className={cn(
-        "flex flex-col gap-2 max-w-[80%]",
-        isUser ? "" : "ml-10"
-      )}>
+      <div className="flex flex-col gap-2 max-w-[80%]">
         <motion.div
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
@@ -166,7 +163,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0 mt-1 absolute right-0 top-0"
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0 mt-1"
         >
           <User size={18} className="text-white" />
         </motion.div>
