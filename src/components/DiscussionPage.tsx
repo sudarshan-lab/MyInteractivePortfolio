@@ -198,7 +198,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
             >
               <ArrowLeft size={20} className="text-primary-400" />
-              <Tooltip content="Back to Portfolio" />
             </motion.button>
             <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
               Community Discussions
