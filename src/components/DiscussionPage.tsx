@@ -279,7 +279,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       {msg.isPrivate && (
                         <div className="group relative">
                           <Lock size={12} className="text-primary-400" />
-                          <Tooltip content="Private Message" />
                         </div>
                       )}
                     </div>
