@@ -83,7 +83,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     try {
       if (content.toLowerCase().includes('your') && content.toLowerCase().includes('resume')) {
-        window.open('/src/data/Resume.pdf', '_blank');
+        window.open('/Resume.pdf', '_blank');
         setMessages(prev => prev.map(msg => 
           msg.id === assistantMessage.id 
             ? { 
