@@ -217,7 +217,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           >
             <Lock size={16} />
             {isAuthenticated ? 'Authenticated' : 'Private Access'}
-            <Tooltip content={isAuthenticated ? "You have access to private messages" : "Enter key to view private messages"} />
+            
           </motion.button>
         </div>
       </motion.div>
