@@ -82,7 +82,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     updateChatMemory(content, true);
 
     try {
-      if (content.toLowerCase().includes('download') && content.toLowerCase().includes('resume')) {
+      if (content.toLowerCase().includes('your') && content.toLowerCase().includes('resume')) {
         window.open('/src/data/Resume.pdf', '_blank');
         setMessages(prev => prev.map(msg => 
           msg.id === assistantMessage.id 
