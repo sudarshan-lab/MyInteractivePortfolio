@@ -6,7 +6,6 @@ import UserAuthModal from './UserAuthModal';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils'; 
 
-
 interface Message {
   id: string;
   content: string;
@@ -46,6 +45,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [showPrivateMessages, setShowPrivateMessages] = useState(() => {
     return localStorage.getItem('showPrivateMessages') !== 'false';
   });
+  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,6 +111,11 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         timestamp: new Date(res.data.timestamp)
       }]);
       setNewMessage('');
+
+      if (isPrivate) {
+        setShowAcknowledgment(true);
+        setTimeout(() => setShowAcknowledgment(false), 3000);
+      }
     } catch (err) {
       alert('Failed to send message!');
     }
@@ -172,146 +177,150 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         className="fixed inset-0 bg-gradient-to-br from-dark-100/95 to-dark-300/95 backdrop-blur-xl z-50 flex flex-col"
       >
         <motion.div 
-  initial={{ y: -20, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ duration: 0.5 }}
-  className="
-    flex flex-wrap items-center justify-between
-    p-3 sm:p-4
-    border-b border-white/10
-    bg-dark-200/50 backdrop-blur-xl
-    z-10
-  "
->
-  {/* Left side */}
-  <div className="flex items-center gap-2 sm:gap-4">
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClose}
-      className="p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
-    >
-      <ArrowLeft size={18} className="text-primary-400" />
-    </motion.button>
-    <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-      Discussions
-    </h2>
-  </div>
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-wrap items-center justify-between p-3 sm:p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl z-10"
+        >
+          <div className="flex items-center gap-2 sm:gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className="p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+            >
+              <ArrowLeft size={18} className="text-primary-400" />
+            </motion.button>
+            <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+              Discussions
+            </h2>
+          </div>
 
-  {/* Right side */}
-  <div className="flex items-center gap-1 sm:gap-3 mt-1 sm:mt-0">
-  {isAuthenticated && (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-      className="p-1 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
-    >
-      {showPrivateMessages ? (
-        <Eye size={15} className="text-primary-400" />
-      ) : (
-        <EyeOff size={15} className="text-gray-400" />
-      )}
-    </motion.button>
-  )}
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    onClick={() => setShowPrivateKeyModal(true)}
-    className={cn(
-      "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full transition-all duration-300 group relative text-xs sm:text-base",
-      isAuthenticated
-        ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-        : "bg-white/5 hover:bg-white/10 border border-white/10"
-    )}
-  >
-    <Lock size={12} />
-    {isAuthenticated ? 'Authenticated' : 'Private Access'}
-  </motion.button>
-</div>
-
-</motion.div>
-
+          <div className="flex items-center gap-1 sm:gap-3 mt-1 sm:mt-0">
+            {isAuthenticated && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowPrivateMessages(!showPrivateMessages)}
+                className="p-1 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+              >
+                {showPrivateMessages ? (
+                  <Eye size={15} className="text-primary-400" />
+                ) : (
+                  <EyeOff size={15} className="text-gray-400" />
+                )}
+              </motion.button>
+            )}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowPrivateKeyModal(true)}
+              className={cn(
+                "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full transition-all duration-300 group relative text-xs sm:text-base",
+                isAuthenticated
+                  ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+                  : "bg-white/5 hover:bg-white/10 border border-white/10"
+              )}
+            >
+              <Lock size={12} />
+              {isAuthenticated ? 'Authenticated' : 'Private Access'}
+            </motion.button>
+          </div>
+        </motion.div>
 
         <div className="flex-1 overflow-y-auto p-4">
-        {filteredMessages.length === 0 ? (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex flex-col items-center justify-center h-full text-center"
-    >
-      <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mb-4 shadow-lg">
-        <MessageSquare size={36} className="text-white" />
-      </div>
-      <h2 className="text-2xl font-bold text-white mb-2">
-        No messages yet!
-      </h2>
-      <p className="text-gray-400 max-w-md mb-3">
-        Be the first to start the conversation. Your message could inspire others!
-      </p>
-    </motion.div>
-  ) : (
-          <AnimatePresence initial={false}>
-            {filteredMessages.map((msg, index) => {
-              const showDate = index === 0 || 
-                formatDate(msg.timestamp) !== formatDate(filteredMessages[index - 1].timestamp);
+          {filteredMessages.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center justify-center h-full text-center"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <MessageSquare size={36} className="text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                No messages yet!
+              </h2>
+              <p className="text-gray-400 max-w-md mb-3">
+                Be the first to start the conversation. Your message could inspire others!
+              </p>
+            </motion.div>
+          ) : (
+            <AnimatePresence initial={false}>
+              {filteredMessages.map((msg, index) => {
+                const showDate = index === 0 || 
+                  formatDate(msg.timestamp) !== formatDate(filteredMessages[index - 1].timestamp);
 
-              return (
-                <React.Fragment key={msg.id}>
-                  {showDate && (
+                return (
+                  <React.Fragment key={msg.id}>
+                    {showDate && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex justify-center my-4"
+                      >
+                        <span className="text-xs text-gray-400 bg-dark-200/50 px-3 py-1 rounded-full">
+                          {formatDate(msg.timestamp)}
+                        </span>
+                      </motion.div>
+                    )}
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex justify-center my-4"
+                      variants={messageVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ duration: 0.2 }}
+                      className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
                     >
-                      <span className="text-xs text-gray-400 bg-dark-200/50 px-3 py-1 rounded-full">
-                        {formatDate(msg.timestamp)}
-                      </span>
-                    </motion.div>
-                  )}
-                  <motion.div
-                    variants={messageVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={{ duration: 0.2 }}
-                    className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
-                  >
-                    <div className="absolute left-4 top-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
-                        {msg.sender[0].toUpperCase()}
+                      <div className="absolute left-4 top-2">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
+                          {msg.sender[0].toUpperCase()}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-medium text-white group relative">
-                        {msg.sender}
-                        <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-dark-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                          {msg.email}
-                        </div>
-                      </span>
-                      <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
-                      {msg.isPrivate && (
-                        <div className="group relative">
-                          <Lock size={12} className="text-primary-400" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-gray-200 mt-1">{msg.content}</p>
-                  </motion.div>
-                </React.Fragment>
-              );
-            })}
-          </AnimatePresence>
-  )}
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-medium text-white group relative">
+                          {msg.sender}
+                          <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-dark-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {msg.email}
+                          </div>
+                        </span>
+                        <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
+                        {msg.isPrivate && (
+                          <div className="group relative">
+                            <Lock size={12} className="text-primary-400" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-gray-200 mt-1">{msg.content}</p>
+                    </motion.div>
+                  </React.Fragment>
+                );
+              })}
+            </AnimatePresence>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
+          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl relative"
         >
+          <AnimatePresence>
+            {showAcknowledgment && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 px-4 py-2 bg-primary-600/20 border border-primary-500/30 rounded-lg text-primary-400 flex items-center gap-2"
+              >
+                <Lock size={14} />
+                Private message sent successfully
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="flex gap-2">
             <motion.button
               whileHover={{ scale: 1.1 }}
