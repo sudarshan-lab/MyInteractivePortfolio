@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X, MessageCircle, Shield } from 'lucide-react';
+import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
 
@@ -188,7 +188,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl discussion-header"
+          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
         >
           <div className="flex items-center gap-4">
             <motion.button
@@ -211,7 +211,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors private-toggle"
+                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
               >
                 {showPrivateMessages ? (
                   <Eye size={20} className="text-primary-400" />
@@ -298,7 +298,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl message-input"
+          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
         >
           <div className="flex gap-2">
             <motion.button
