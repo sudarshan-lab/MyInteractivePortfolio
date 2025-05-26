@@ -326,7 +326,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg group relative"
             >
               <Send size={20} className="text-white" />
-              <Tooltip content="Send Message" />
             </motion.button>
           </div>
         </motion.div>
