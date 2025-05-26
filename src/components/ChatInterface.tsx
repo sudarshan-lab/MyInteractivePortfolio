@@ -6,11 +6,16 @@ import { useChat } from '../context/ChatContext';
 import { MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DiscussionPage from './DiscussionPage';
+import TutorialOverlay from './TutorialOverlay';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [showDiscussions, setShowDiscussions] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(() => {
+    return !localStorage.getItem('tutorialCompleted');
+  });
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,6 +30,15 @@ const ChatInterface: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
+  const completeTutorial = () => {
+    setShowTutorial(false);
+    localStorage.setItem('tutorialCompleted', 'true');
+  };
+
+  const handleNextTutorialStep = () => {
+    setCurrentTutorialStep(prev => prev + 1);
+  };
+
   return (
     <>
       <div className="flex flex-col h-screen">
@@ -34,7 +48,7 @@ const ChatInterface: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="mt-28 sm:mt-0 flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-md bg-dark-100/95 z-10"
         >
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.location.reload()}>
+          <div className="flex items-center space-x-3 cursor-pointer header-title" onClick={() => window.location.reload()}>
             <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
               <MessageSquare size={20} className="text-white" />
             </div>
@@ -51,7 +65,7 @@ const ChatInterface: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
             <div 
-              className="text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2"
+              className="text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2 discussion-button"
               onClick={() => setShowDiscussions(true)}
             >
               <MessageSquare size={16} />
@@ -76,7 +90,9 @@ const ChatInterface: React.FC = () => {
                 I'd love to tell you about my experience in software engineering, my projects, and skills.
                 Feel free to ask me anything or try one of the suggestions below!
               </p>
-              <SuggestionChips large />
+              <div className="suggestion-chips">
+                <SuggestionChips large />
+              </div>
             </motion.div>
           ) : (
             <>
@@ -88,7 +104,7 @@ const ChatInterface: React.FC = () => {
 
         <div className="border-t border-dark-300/50 p-4 bg-dark-200/80 backdrop-blur-sm">
           {messages.length > 0 && !loading && (
-            <div className="mb-3">
+            <div className="mb-3 suggestion-chips">
               <SuggestionChips />
             </div>
           )}
@@ -101,6 +117,14 @@ const ChatInterface: React.FC = () => {
           <DiscussionPage onClose={() => setShowDiscussions(false)} />
         )}
       </AnimatePresence>
+
+      <TutorialOverlay
+        isOpen={showTutorial}
+        onClose={completeTutorial}
+        currentStep={currentTutorialStep}
+        onNextStep={handleNextTutorialStep}
+        onSkip={completeTutorial}
+      />
     </>
   );
 };
