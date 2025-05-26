@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X } from 'lucide-react';
+import { Lock, Send, Users, ArrowLeft, Eye, EyeOff, X, MessageSquare } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
+import axios from 'axios';
+import { API_BASE_URL } from '../utils'; 
+
 
 interface Message {
   id: string;
@@ -18,33 +21,6 @@ interface UserData {
   email: string;
 }
 
-const DUMMY_MESSAGES: Message[] = [
-  {
-    id: '1',
-    content: "Hey everyone! What's your favorite programming language?",
-    sender: "Alice",
-    email: "alice@example.com",
-    timestamp: new Date('2024-03-10T10:00:00'),
-    isPrivate: false
-  },
-  {
-    id: '2',
-    content: "I'm working on a React project, anyone interested in collaborating?",
-    sender: "Bob",
-    email: "bob@example.com",
-    timestamp: new Date('2024-03-10T11:30:00'),
-    isPrivate: false
-  },
-  {
-    id: '3',
-    content: "Private message about the project details.",
-    sender: "Charlie",
-    email: "charlie@example.com",
-    timestamp: new Date('2024-03-10T12:15:00'),
-    isPrivate: true
-  }
-];
-
 const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
 
 const messageVariants = {
@@ -52,12 +28,6 @@ const messageVariants = {
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -20 }
 };
-
-const Tooltip: React.FC<{ content: string }> = ({ content }) => (
-  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-    {content}
-  </div>
-);
 
 const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -81,7 +51,16 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     if (userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
-      setMessages(DUMMY_MESSAGES);
+      axios.get(API_BASE_URL+'/api/messages')
+      .then(res => {
+        setMessages(res.data.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })));
+      })
+      .catch(err => {
+        console.error('Failed to fetch messages:', err);
+      });
     }
   }, [userData]);
 
@@ -115,21 +94,28 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() || !userData) return;
-
-    const newMsg: Message = {
-      id: Math.random().toString(),
+  
+    const newMsg = {
       content: newMessage,
       sender: userData.name,
       email: userData.email,
-      timestamp: new Date(),
       isPrivate: isPrivate
     };
-
-    setMessages(prev => [...prev, newMsg]);
-    setNewMessage('');
+  
+    try {
+      const res = await axios.post(API_BASE_URL+'/api/messages', newMsg);
+      setMessages(prev => [...prev, {
+        ...res.data,
+        timestamp: new Date(res.data.timestamp)
+      }]);
+      setNewMessage('');
+    } catch (err) {
+      alert('Failed to send message!');
+    }
   };
+  
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -186,57 +172,86 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         className="fixed inset-0 bg-gradient-to-br from-dark-100/95 to-dark-300/95 backdrop-blur-xl z-50 flex flex-col"
       >
         <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
-        >
-          <div className="flex items-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onClose}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
-            >
-              <ArrowLeft size={20} className="text-primary-400" />
-            </motion.button>
-            <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              Community Discussions
-            </h2>
-          </div>
+  initial={{ y: -20, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ duration: 0.5 }}
+  className="
+    flex flex-wrap items-center justify-between
+    p-3 sm:p-4
+    border-b border-white/10
+    bg-dark-200/50 backdrop-blur-xl
+    z-10
+  "
+>
+  {/* Left side */}
+  <div className="flex items-center gap-2 sm:gap-4">
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={onClose}
+      className="p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+    >
+      <ArrowLeft size={18} className="text-primary-400" />
+    </motion.button>
+    <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+      Discussions
+    </h2>
+  </div>
 
-          <div className="flex items-center gap-3">
-            {isAuthenticated && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
-              >
-                {showPrivateMessages ? (
-                  <Eye size={20} className="text-primary-400" />
-                ) : (
-                  <EyeOff size={20} className="text-gray-400" />
-                )}
-              </motion.button>
-            )}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowPrivateKeyModal(true)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 group relative",
-                isAuthenticated 
-                  ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-                  : "bg-white/5 hover:bg-white/10 border border-white/10"
-              )}
-            >
-              <Lock size={16} />
-              {isAuthenticated ? 'Authenticated' : 'Private Access'}
-            </motion.button>
-          </div>
-        </motion.div>
+  {/* Right side */}
+  <div className="flex items-center gap-1 sm:gap-3 mt-1 sm:mt-0">
+  {isAuthenticated && (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => setShowPrivateMessages(!showPrivateMessages)}
+      className="p-1 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+    >
+      {showPrivateMessages ? (
+        <Eye size={15} className="text-primary-400" />
+      ) : (
+        <EyeOff size={15} className="text-gray-400" />
+      )}
+    </motion.button>
+  )}
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={() => setShowPrivateKeyModal(true)}
+    className={cn(
+      "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full transition-all duration-300 group relative text-xs sm:text-base",
+      isAuthenticated
+        ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
+        : "bg-white/5 hover:bg-white/10 border border-white/10"
+    )}
+  >
+    <Lock size={12} />
+    {isAuthenticated ? 'Authenticated' : 'Private Access'}
+  </motion.button>
+</div>
+
+</motion.div>
+
 
         <div className="flex-1 overflow-y-auto p-4">
+        {filteredMessages.length === 0 ? (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col items-center justify-center h-full text-center"
+    >
+      <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mb-4 shadow-lg">
+        <MessageSquare size={36} className="text-white" />
+      </div>
+      <h2 className="text-2xl font-bold text-white mb-2">
+        No messages yet!
+      </h2>
+      <p className="text-gray-400 max-w-md mb-3">
+        Be the first to start the conversation. Your message could inspire others!
+      </p>
+    </motion.div>
+  ) : (
           <AnimatePresence initial={false}>
             {filteredMessages.map((msg, index) => {
               const showDate = index === 0 || 
@@ -288,6 +303,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               );
             })}
           </AnimatePresence>
+  )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -315,7 +331,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Type your message..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
               style={{ height: 'auto' }}
             />
             <motion.button

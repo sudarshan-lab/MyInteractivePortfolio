@@ -3,9 +3,9 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import SuggestionChips from './SuggestionChips';
 import { useChat } from '../context/ChatContext';
-import { MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DiscussionPage from './DiscussionPage';
+import { MessageSquare, Users } from 'lucide-react';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
@@ -24,37 +24,55 @@ const ChatInterface: React.FC = () => {
   return (
     <>
       <div className="flex flex-col h-screen">
-        <motion.header 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mt-28 sm:mt-0 flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-md bg-dark-100/95 z-10"
-        >
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={handleRefresh}>
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
-              <MessageSquare size={20} className="text-white" />
-            </div>
-            <h1 className="text-xl font-semibold text-white flex items-center">
-              Hi, I'm Sudarshan!
-              <span
-                className="inline-block transform scale-[0.75] sm:scale-100"
-                role="img"
-                aria-label="wave"
-              >
-                👋
-              </span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
+       <motion.header 
+  initial={{ y: -20, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ duration: 0.5 }}
+  className="
+    mt-28 sm:mt-0
+    flex flex-wrap items-center justify-between
+    p-3 sm:p-4
+    border-b border-dark-300/50
+    backdrop-blur-md bg-dark-100/95
+    z-10
+  "
+>
+  <div className="flex items-center space-x-2 sm:space-x-3" onClick={handleRefresh}>
+    <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
+      <MessageSquare size={18} className="text-white" />
+    </div>
+    <h1 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-1">
+      Hi, I’m Sudarshan!
+      <span
+        className="inline-block transform scale-90 sm:scale-100"
+        role="img"
+        aria-label="wave"
+      >
+        👋
+      </span>
+    </h1>
+  </div>
+  <div className="flex items-center gap-4">
             <div 
-              className="text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2"
+              className=" text-xs sm:text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2"
               onClick={() => setShowDiscussions(true)}
             >
-              <MessageSquare size={16} />
+              <div className="group relative flex items-center">
+    <Users size={16} />
+    <span className="
+      absolute top-full left-1/2 -translate-x-1/2 mt-2
+      px-2 py-1 rounded bg-dark-200 text-xs text-white whitespace-nowrap
+      opacity-0 group-hover:opacity-100 transition-opacity z-20
+      pointer-events-none
+    ">
+      Discussions
+    </span>
+  </div>
               Software Engineer
             </div>
-          </div>
-        </motion.header>
+            </div>
+</motion.header>
+
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 ? (
