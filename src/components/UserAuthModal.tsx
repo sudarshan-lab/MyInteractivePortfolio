@@ -35,30 +35,32 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         className="bg-gradient-to-br from-dark-200 to-dark-300 rounded-lg w-full max-w-md relative overflow-hidden border border-white/10 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-primary-700/10" />
         
-        <motion.div
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="absolute top-2 right-2"
-        >
+        <div className="absolute top-2 right-2">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors"
+            className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
           >
             <X size={20} className="text-gray-400" />
+            <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Close Dialog
+            </div>
           </motion.button>
-        </motion.div>
+        </div>
 
         <div className="p-6 relative">
           <motion.div 
