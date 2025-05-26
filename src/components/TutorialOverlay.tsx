@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -6,6 +6,7 @@ interface TutorialStep {
   title: string;
   description: string;
   icon?: React.ReactNode;
+  targetElement?: string;
 }
 
 interface TutorialOverlayProps {
@@ -27,6 +28,60 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 }) => {
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [arrowPosition, setArrowPosition] = useState('bottom');
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (step.targetElement) {
+        const element = document.querySelector(step.targetElement);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const viewportWidth = window.innerWidth;
+          
+          // Calculate if tooltip should be above or below the element
+          const spaceBelow = viewportHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          const tooltipHeight = 200; // Approximate height of tooltip
+          
+          let top, left;
+          let newArrowPosition;
+
+          if (spaceBelow >= tooltipHeight || spaceBelow > spaceAbove) {
+            // Position below
+            top = rect.bottom + 20;
+            newArrowPosition = 'top';
+          } else {
+            // Position above
+            top = rect.top - tooltipHeight - 20;
+            newArrowPosition = 'bottom';
+          }
+
+          // Center horizontally
+          left = rect.left + (rect.width / 2) - 150; // 300px is tooltip width
+
+          // Adjust if tooltip would go off screen
+          if (left < 20) left = 20;
+          if (left + 300 > viewportWidth) left = viewportWidth - 320;
+
+          setTooltipPosition({ top, left });
+          setArrowPosition(newArrowPosition);
+        }
+      } else {
+        // Center in viewport if no target
+        setTooltipPosition({
+          top: '50%',
+          left: '50%'
+        });
+        setArrowPosition('none');
+      }
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [step, currentStep]);
 
   return (
     <AnimatePresence>
@@ -42,8 +97,23 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-dark-200 rounded-lg p-6 max-w-sm w-full border border-white/10 shadow-xl"
+            style={{
+              position: 'absolute',
+              top: typeof tooltipPosition.top === 'number' ? `${tooltipPosition.top}px` : tooltipPosition.top,
+              left: typeof tooltipPosition.left === 'number' ? `${tooltipPosition.left}px` : tooltipPosition.left,
+              transform: arrowPosition === 'none' ? 'translate(-50%, -50%)' : 'none'
+            }}
+            className="bg-dark-200 rounded-lg p-6 w-[300px] border border-white/10 shadow-xl"
           >
+            {/* Arrow */}
+            {arrowPosition !== 'none' && (
+              <div
+                className={`absolute w-4 h-4 bg-dark-200 transform rotate-45 ${
+                  arrowPosition === 'top' ? '-top-2' : '-bottom-2'
+                } left-1/2 -translate-x-1/2 border border-white/10`}
+              />
+            )}
+
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
