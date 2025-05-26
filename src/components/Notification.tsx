@@ -23,7 +23,7 @@ const Notification: React.FC<NotificationProps> = ({ type, message, onClose }) =
       )}
     >
       {type === 'success' ? (
-        <CheckCircle className="text-green-500" size={20} />
+        <CheckCircle className="text-green-500\" size={20} />
       ) : (
         <AlertCircle className="text-red-500" size={20} />
       )}
