@@ -188,43 +188,34 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
+          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
         >
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-4">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+              className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
             >
-              <ArrowLeft size={16} className="text-primary-400 sm:hidden" />
-              <ArrowLeft size={20} className="text-primary-400 hidden sm:block" />
+              <ArrowLeft size={20} className="text-primary-400" />
             </motion.button>
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full">
-                <MessageSquare size={14} className="text-white sm:hidden" />
-                <MessageSquare size={18} className="text-white hidden sm:block" />
-              </div>
-              <h2 className="text-base sm:text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-                Community
-              </h2>
-            </div>
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+              Community Discussions
+            </h2>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-3">
             {isAuthenticated && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-                className="group relative p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors"
+                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
               >
                 {showPrivateMessages ? (
-                  <Eye size={16} className="text-primary-400 sm:hidden" />
-                  <Eye size={20} className="text-primary-400 hidden sm:block" />
+                  <Eye size={20} className="text-primary-400" />
                 ) : (
-                  <EyeOff size={16} className="text-gray-400 sm:hidden" />
-                  <EyeOff size={20} className="text-gray-400 hidden sm:block" />
+                  <EyeOff size={20} className="text-gray-400" />
                 )}
               </motion.button>
             )}
@@ -233,17 +224,14 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowPrivateKeyModal(true)}
               className={cn(
-                "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full transition-all duration-300 group relative",
+                "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 group relative",
                 isAuthenticated 
                   ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
                   : "bg-white/5 hover:bg-white/10 border border-white/10"
               )}
             >
-              <Lock size={14} className="sm:hidden" />
-              <Lock size={16} className="hidden sm:block" />
-              <span className="text-sm">
-                {isAuthenticated ? 'Auth' : 'Private'}
-              </span>
+              <Lock size={16} />
+              {isAuthenticated ? 'Authenticated' : 'Private Access'}
             </motion.button>
           </div>
         </motion.div>
