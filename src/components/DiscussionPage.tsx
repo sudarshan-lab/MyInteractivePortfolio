@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft, User } from 'lucide-react';
+import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
 
@@ -141,38 +141,46 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 bg-gradient-to-br from-dark-100 via-dark-200 to-dark-300 backdrop-blur-lg z-50 flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-gradient-to-br from-dark-100/95 to-dark-300/95 backdrop-blur-xl z-50 flex flex-col"
     >
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-sm bg-dark-100/80"
+        className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
       >
         <div className="flex items-center gap-4">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 hover:bg-dark-300/50 rounded-full transition-colors"
+            className="p-2 hover:bg-white/5 rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-primary-400" />
           </motion.button>
           <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-            Discussions
+            Community Discussions
           </h2>
         </div>
+
         <div className="flex items-center gap-3">
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-dark-300/50 rounded-full border border-dark-400/30"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
           >
             <User size={16} className="text-primary-400" />
             <span className="text-sm text-gray-200">{userData.name}</span>
+          </motion.div>
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
+          >
+            <Mail size={16} className="text-primary-400" />
+            <span className="text-sm text-gray-200">{userData.email}</span>
           </motion.div>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -182,7 +190,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300",
               isAuthenticated 
                 ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-                : "bg-dark-300/50 hover:bg-dark-400/50 border border-dark-400/30"
+                : "bg-white/5 hover:bg-white/10 border border-white/10"
             )}
           >
             <Lock size={16} />
@@ -207,7 +215,10 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               )}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-gray-400">{msg.sender}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-400">{msg.sender}</span>
+                  <span className="text-xs text-gray-500">{msg.email}</span>
+                </div>
                 {msg.isPrivate && (
                   <motion.div
                     initial={{ scale: 0 }}
@@ -225,10 +236,10 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ? "bg-gradient-to-br from-primary-600/90 to-primary-700/90 text-white"
                     : msg.isPrivate
                     ? "bg-gradient-to-br from-primary-600/20 to-primary-700/20 border border-primary-500/20"
-                    : "bg-dark-300/50 border border-dark-400/20"
+                    : "bg-white/5 border border-white/10"
                 )}
               >
-                <p className="text-gray-100">{msg.content}</p>
+                <p className="text-gray-100 leading-relaxed">{msg.content}</p>
                 <span className="text-xs text-gray-400 mt-2 block">
                   {new Date(msg.timestamp).toLocaleString()}
                 </span>
@@ -242,7 +253,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="p-4 border-t border-dark-300/50 bg-dark-200/80 backdrop-blur-sm"
+        className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
       >
         <div className="flex gap-2">
           <motion.button
@@ -253,7 +264,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               "p-2 rounded-full transition-all duration-300",
               isPrivate 
                 ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
-                : "bg-dark-300/50 hover:bg-dark-400/50 border border-dark-400/30"
+                : "bg-white/5 hover:bg-white/10 border border-white/10"
             )}
             title={isPrivate ? "Private Message" : "Public Message"}
           >
@@ -264,7 +275,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 bg-dark-300/50 border border-dark-400/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
+            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none h-10 max-h-32 placeholder:text-gray-500"
             style={{ height: 'auto' }}
           />
           <motion.button
@@ -291,7 +302,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-dark-200 p-6 rounded-lg w-full max-w-md border border-dark-400/30 shadow-xl"
+              className="bg-dark-200 p-6 rounded-lg w-full max-w-md border border-white/10 shadow-xl"
             >
               <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
                 Enter Private Key
@@ -300,7 +311,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 type="password"
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
-                className="w-full bg-dark-300/50 border border-dark-400/30 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 placeholder:text-gray-500"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 placeholder:text-gray-500"
                 placeholder="Enter private key..."
               />
               <div className="flex justify-end gap-2">
@@ -308,7 +319,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowPrivateKeyModal(false)}
-                  className="px-4 py-2 bg-dark-300/50 hover:bg-dark-400/50 rounded-lg transition-colors"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   Cancel
                 </motion.button>
