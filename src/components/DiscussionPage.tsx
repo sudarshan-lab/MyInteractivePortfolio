@@ -58,17 +58,20 @@ const discussionTutorialSteps = [
   {
     title: 'Welcome to Discussions',
     description: 'This is where you can interact with other developers and share your thoughts.',
-    icon: <MessageCircle size={16} className="text-white" />
+    icon: <MessageCircle size={16} className="text-white" />,
+    targetElement: '.discussion-header'
   },
   {
     title: 'Private Messages',
     description: 'Toggle private messages visibility and access authenticated content.',
-    icon: <Shield size={16} className="text-white" />
+    icon: <Shield size={16} className="text-white" />,
+    targetElement: '.private-toggle'
   },
   {
     title: 'Join the Conversation',
     description: 'Use the message input below to start engaging with the community.',
-    icon: <MessageSquare size={16} className="text-white" />
+    icon: <MessageSquare size={16} className="text-white" />,
+    targetElement: '.message-input'
   }
 ];
 
@@ -220,7 +223,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl"
+          className="flex items-center justify-between p-4 border-b border-white/10 bg-dark-200/50 backdrop-blur-xl discussion-header"
         >
           <div className="flex items-center gap-4">
             <motion.button
@@ -243,7 +246,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
+                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors private-toggle"
               >
                 {showPrivateMessages ? (
                   <Eye size={20} className="text-primary-400" />
@@ -330,7 +333,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl"
+          className="p-4 border-t border-white/10 bg-dark-200/50 backdrop-blur-xl message-input"
         >
           <div className="flex gap-2">
             <motion.button
