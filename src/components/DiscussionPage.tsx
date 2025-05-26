@@ -21,7 +21,7 @@ interface UserData {
   email: string;
 }
 
-const PRIVATE_KEY_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8";
+const PRIVATE_KEY_HASH = "22c29df221527fe0168f2e5498d420a6ea56fba1c6d201d8a1667fd3977b3cd9";
 
 const messageVariants = {
   initial: { opacity: 0, x: -20 },
