@@ -53,12 +53,6 @@ const messageVariants = {
   exit: { opacity: 0, x: -20 }
 };
 
-const Tooltip: React.FC<{ content: string }> = ({ content }) => (
-  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-    {content}
-  </div>
-);
-
 const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -195,10 +189,9 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors group relative"
+              className="p-2 hover:bg-white/5 rounded-full transition-colors"
             >
               <ArrowLeft size={20} className="text-primary-400" />
-              <Tooltip content="Back to Portfolio" />
             </motion.button>
             <h2 className="text-xl font-semibold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
               Community Discussions
@@ -211,14 +204,13 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowPrivateMessages(!showPrivateMessages)}
-                className="group relative p-2 hover:bg-white/5 rounded-full transition-colors"
+                className="p-2 hover:bg-white/5 rounded-full transition-colors"
               >
                 {showPrivateMessages ? (
                   <Eye size={20} className="text-primary-400" />
                 ) : (
                   <EyeOff size={20} className="text-gray-400" />
                 )}
-                <Tooltip content={showPrivateMessages ? "Hide Private Messages" : "Show Private Messages"} />
               </motion.button>
             )}
             <motion.button
@@ -226,7 +218,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowPrivateKeyModal(true)}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 group relative",
+                "flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300",
                 isAuthenticated 
                   ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
                   : "bg-white/5 hover:bg-white/10 border border-white/10"
@@ -234,7 +226,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <Lock size={16} />
               {isAuthenticated ? 'Authenticated' : 'Private Access'}
-              <Tooltip content={isAuthenticated ? "Already Authenticated" : "Access Private Messages"} />
             </motion.button>
           </div>
         </motion.div>
@@ -264,7 +255,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     animate="animate"
                     exit="exit"
                     transition={{ duration: 0.2 }}
-                    className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
+                    className="pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
                   >
                     <div className="absolute left-4 top-2">
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
@@ -272,18 +263,12 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="font-medium text-white group relative">
-                        {msg.sender}
-                        <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-dark-300 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                          {msg.email}
-                        </div>
+                      <span className="font-medium text-white">
+                        {msg.sender} • <span className="text-gray-400">{msg.email}</span>
                       </span>
                       <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
                       {msg.isPrivate && (
-                        <div className="group relative">
-                          <Lock size={12} className="text-primary-400" />
-                          <Tooltip content="Private Message" />
-                        </div>
+                        <Lock size={12} className="text-primary-400" />
                       )}
                     </div>
                     <p className="text-gray-200 mt-1">{msg.content}</p>
@@ -306,14 +291,13 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsPrivate(!isPrivate)}
               className={cn(
-                "p-2 rounded-full transition-all duration-300 group relative",
+                "p-2 rounded-full transition-all duration-300",
                 isPrivate 
                   ? "bg-primary-600/20 text-primary-400 border border-primary-500/30"
                   : "bg-white/5 hover:bg-white/10 border border-white/10"
               )}
             >
               {isPrivate ? <Lock size={20} /> : <Users size={20} />}
-              <Tooltip content={isPrivate ? "Private Message" : "Public Message"} />
             </motion.button>
             <textarea
               value={newMessage}
@@ -328,10 +312,9 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               whileTap={{ scale: 0.9 }}
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
-              className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg group relative"
+              className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:hover:from-primary-600 disabled:hover:to-primary-700 rounded-full transition-all duration-300 shadow-lg"
             >
               <Send size={20} className="text-white" />
-              <Tooltip content="Send Message" />
             </motion.button>
           </div>
         </motion.div>
