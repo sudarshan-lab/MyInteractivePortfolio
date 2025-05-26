@@ -64,24 +64,34 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [privateKey, setPrivateKey] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
   const [showPrivateKeyModal, setShowPrivateKeyModal] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(() => {
     const saved = localStorage.getItem('userData');
     return saved ? JSON.parse(saved) : null;
   });
   const [showAuthModal, setShowAuthModal] = useState(!localStorage.getItem('userData'));
-  const [showPrivateMessages, setShowPrivateMessages] = useState(true);
+  const [showPrivateMessages, setShowPrivateMessages] = useState(() => {
+    return localStorage.getItem('showPrivateMessages') !== 'false';
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
-      setTimeout(() => {
-        setMessages(DUMMY_MESSAGES);
-      }, 1000);
+      setMessages(DUMMY_MESSAGES);
     }
   }, [userData]);
+
+  useEffect(() => {
+    localStorage.setItem('isAuthenticated', isAuthenticated.toString());
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    localStorage.setItem('showPrivateMessages', showPrivateMessages.toString());
+  }, [showPrivateMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
