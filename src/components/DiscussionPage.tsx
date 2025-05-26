@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff } from 'lucide-react';
+import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
 
