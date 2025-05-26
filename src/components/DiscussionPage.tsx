@@ -48,9 +48,9 @@ const DUMMY_MESSAGES: Message[] = [
 const PRIVATE_KEY_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
 
 const messageVariants = {
-  initial: { opacity: 0, y: 20, scale: 0.95 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, scale: 0.95 }
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 }
 };
 
 const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -126,6 +126,21 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     !msg.isPrivate || (msg.isPrivate && isAuthenticated)
   );
 
+  const formatTime = (date: Date) => {
+    return new Date(date).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   if (!userData) {
     return (
       <AnimatePresence>
@@ -166,22 +181,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
-          >
-            <User size={16} className="text-primary-400" />
-            <span className="text-sm text-gray-200">{userData.name}</span>
-          </motion.div>
-          <motion.div 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10"
-          >
-            <Mail size={16} className="text-primary-400" />
-            <span className="text-sm text-gray-200">{userData.email}</span>
-          </motion.div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -199,53 +198,52 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4">
         <AnimatePresence initial={false}>
-          {filteredMessages.map((msg, index) => (
-            <motion.div
-              key={msg.id}
-              variants={messageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className={cn(
-                "max-w-[80%] break-words",
-                msg.email === userData.email ? "ml-auto" : "mr-auto"
-              )}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-400">{msg.sender}</span>
-                  <span className="text-xs text-gray-500">{msg.email}</span>
-                </div>
-                {msg.isPrivate && (
+          {filteredMessages.map((msg, index) => {
+            const showDate = index === 0 || 
+              formatDate(msg.timestamp) !== formatDate(filteredMessages[index - 1].timestamp);
+
+            return (
+              <React.Fragment key={msg.id}>
+                {showDate && (
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="bg-primary-600/20 p-1 rounded-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-center my-4"
                   >
-                    <Lock size={12} className="text-primary-400" />
+                    <span className="text-xs text-gray-400 bg-dark-200/50 px-3 py-1 rounded-full">
+                      {formatDate(msg.timestamp)}
+                    </span>
                   </motion.div>
                 )}
-              </div>
-              <div
-                className={cn(
-                  "p-4 rounded-2xl shadow-lg backdrop-blur-sm",
-                  msg.email === userData.email
-                    ? "bg-gradient-to-br from-primary-600/90 to-primary-700/90 text-white"
-                    : msg.isPrivate
-                    ? "bg-gradient-to-br from-primary-600/20 to-primary-700/20 border border-primary-500/20"
-                    : "bg-white/5 border border-white/10"
-                )}
-              >
-                <p className="text-gray-100 leading-relaxed">{msg.content}</p>
-                <span className="text-xs text-gray-400 mt-2 block">
-                  {new Date(msg.timestamp).toLocaleString()}
-                </span>
-              </div>
-            </motion.div>
-          ))}
+                <motion.div
+                  variants={messageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.2 }}
+                  className="group relative pl-12 pr-4 py-1 hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <div className="absolute left-4 top-2">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-sm font-medium">
+                      {msg.sender[0].toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-medium text-white cursor-help" title={msg.email}>
+                      {msg.sender}
+                    </span>
+                    <span className="text-xs text-gray-400">{formatTime(msg.timestamp)}</span>
+                    {msg.isPrivate && (
+                      <Lock size={12} className="text-primary-400" />
+                    )}
+                  </div>
+                  <p className="text-gray-200 mt-1">{msg.content}</p>
+                </motion.div>
+              </React.Fragment>
+            );
+          })}
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
