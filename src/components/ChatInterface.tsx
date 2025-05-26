@@ -3,17 +3,35 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import SuggestionChips from './SuggestionChips';
 import { useChat } from '../context/ChatContext';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Sparkles, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DiscussionPage from './DiscussionPage';
 import TutorialOverlay from './TutorialOverlay';
+
+const chatTutorialSteps = [
+  {
+    title: 'Welcome to My Portfolio!',
+    description: 'Click on my name to restart the conversation anytime.',
+    icon: <MessageSquare size={16} className="text-white" />
+  },
+  {
+    title: 'Quick Suggestions',
+    description: 'Use these suggestions to learn more about my experience and skills.',
+    icon: <Sparkles size={16} className="text-white" />
+  },
+  {
+    title: 'Join the Community',
+    description: 'Click here to join discussions with other developers!',
+    icon: <MessageCircle size={16} className="text-white" />
+  }
+];
 
 const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [showDiscussions, setShowDiscussions] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => {
-    return !localStorage.getItem('tutorialCompleted');
+    return !localStorage.getItem('chatTutorialCompleted');
   });
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
 
@@ -32,7 +50,7 @@ const ChatInterface: React.FC = () => {
 
   const completeTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem('tutorialCompleted', 'true');
+    localStorage.setItem('chatTutorialCompleted', 'true');
   };
 
   const handleNextTutorialStep = () => {
@@ -124,6 +142,7 @@ const ChatInterface: React.FC = () => {
         currentStep={currentTutorialStep}
         onNextStep={handleNextTutorialStep}
         onSkip={completeTutorial}
+        steps={chatTutorialSteps}
       />
     </>
   );
