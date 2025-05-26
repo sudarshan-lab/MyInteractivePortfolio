@@ -13,19 +13,22 @@ const chatTutorialSteps = [
     title: 'Welcome to My Portfolio!',
     description: 'Click on my name to restart the conversation anytime.',
     icon: <MessageSquare size={16} className="text-white" />,
-    targetElement: '.header-title'
+    targetElement: '.header-title',
+    position: 'bottom'
   },
   {
     title: 'Quick Suggestions',
     description: 'Use these suggestions to learn more about my experience and skills.',
     icon: <Sparkles size={16} className="text-white" />,
-    targetElement: '.suggestion-chips'
+    targetElement: '.suggestion-chips',
+    position: 'top'
   },
   {
     title: 'Join the Community',
     description: 'Click here to join discussions with other developers!',
     icon: <MessageCircle size={16} className="text-white" />,
-    targetElement: '.discussion-button'
+    targetElement: '.discussion-button',
+    position: 'bottom'
   }
 ];
 

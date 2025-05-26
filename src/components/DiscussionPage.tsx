@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Lock, Send, Users, ArrowLeft, User, Mail, Eye, EyeOff, X, MessageCircle, Shield } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAuthModal from './UserAuthModal';
-import TutorialOverlay from './TutorialOverlay';
 
 interface Message {
   id: string;
@@ -54,27 +53,6 @@ const messageVariants = {
   exit: { opacity: 0, x: -20 }
 };
 
-const discussionTutorialSteps = [
-  {
-    title: 'Welcome to Discussions',
-    description: 'This is where you can interact with other developers and share your thoughts.',
-    icon: <MessageCircle size={16} className="text-white" />,
-    targetElement: '.discussion-header'
-  },
-  {
-    title: 'Private Messages',
-    description: 'Toggle private messages visibility and access authenticated content.',
-    icon: <Shield size={16} className="text-white" />,
-    targetElement: '.private-toggle'
-  },
-  {
-    title: 'Join the Conversation',
-    description: 'Use the message input below to start engaging with the community.',
-    icon: <MessageSquare size={16} className="text-white" />,
-    targetElement: '.message-input'
-  }
-];
-
 const Tooltip: React.FC<{ content: string }> = ({ content }) => (
   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-dark-300 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
     {content}
@@ -98,10 +76,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [showPrivateMessages, setShowPrivateMessages] = useState(() => {
     return localStorage.getItem('showPrivateMessages') !== 'false';
   });
-  const [showTutorial, setShowTutorial] = useState(() => {
-    return !localStorage.getItem('discussionTutorialCompleted');
-  });
-  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -169,15 +143,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setUserData(newUserData);
     localStorage.setItem('userData', JSON.stringify(newUserData));
     setShowAuthModal(false);
-  };
-
-  const completeTutorial = () => {
-    setShowTutorial(false);
-    localStorage.setItem('discussionTutorialCompleted', 'true');
-  };
-
-  const handleNextTutorialStep = () => {
-    setCurrentTutorialStep(prev => prev + 1);
   };
 
   const filteredMessages = messages.filter(msg => 
@@ -433,15 +398,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           )}
         </AnimatePresence>
       </motion.div>
-
-      <TutorialOverlay
-        isOpen={showTutorial}
-        onClose={completeTutorial}
-        currentStep={currentTutorialStep}
-        onNextStep={handleNextTutorialStep}
-        onSkip={completeTutorial}
-        steps={discussionTutorialSteps}
-      />
     </>
   );
 };

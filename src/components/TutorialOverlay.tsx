@@ -7,6 +7,7 @@ interface TutorialStep {
   description: string;
   icon?: React.ReactNode;
   targetElement?: string;
+  position?: 'top' | 'bottom';
 }
 
 interface TutorialOverlayProps {
@@ -37,25 +38,19 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         const element = document.querySelector(step.targetElement);
         if (element) {
           const rect = element.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
           const viewportWidth = window.innerWidth;
-          
-          // Calculate if tooltip should be above or below the element
-          const spaceBelow = viewportHeight - rect.bottom;
-          const spaceAbove = rect.top;
           const tooltipHeight = 200; // Approximate height of tooltip
           
           let top, left;
           let newArrowPosition;
 
-          if (spaceBelow >= tooltipHeight || spaceBelow > spaceAbove) {
-            // Position below
-            top = rect.bottom + 20;
-            newArrowPosition = 'top';
-          } else {
-            // Position above
+          // Force position based on step preference
+          if (step.position === 'top') {
             top = rect.top - tooltipHeight - 20;
             newArrowPosition = 'bottom';
+          } else {
+            top = rect.bottom + 20;
+            newArrowPosition = 'top';
           }
 
           // Center horizontally
