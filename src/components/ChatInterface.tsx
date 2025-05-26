@@ -16,6 +16,15 @@ const ChatInterface: React.FC = () => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.clear();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   return (
     <>
       <div className="flex flex-col h-screen">
