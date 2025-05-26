@@ -10,7 +10,7 @@ app.use(express.json());
 const cors = require('cors');
 
 app.use(cors({
-    origin: ['https://skammu.website', 'http://localhost:5173'],
+    origin: ['https://www.sudarshan.website', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true 
