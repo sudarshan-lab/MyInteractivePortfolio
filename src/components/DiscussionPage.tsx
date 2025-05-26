@@ -217,7 +217,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           >
             <Lock size={16} />
             {isAuthenticated ? 'Authenticated' : 'Private Access'}
-            
           </motion.button>
         </div>
       </motion.div>
