@@ -309,7 +309,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               )}
             >
               {isPrivate ? <Lock size={20} /> : <Users size={20} />}
-              <Tooltip content={isPrivate ? "Private Message" : "Public Message"} />
             </motion.button>
             <textarea
               value={newMessage}
