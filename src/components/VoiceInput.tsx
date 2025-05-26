@@ -108,38 +108,39 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript }) => {
   }
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={toggleListening}
-      className={cn(
-        "p-2 mb-3 rounded-full transition-colors relative group",
-        isListening 
-          ? "bg-red-500/20 text-red-500" 
-          : "bg-dark-300/50 text-gray-400 hover:text-primary-500"
-      )}
-    >
-      {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-      
-      {/* Permission denied tooltip */}
-      {permissionState === 'denied' && (
-       <div className="
-       absolute bottom-full 
-       left-1 sm:left-1/2 sm:-translate-x-1/2 
-       mb-2 px-3 py-1 
-       bg-dark-300 text-white text-xs rounded-md 
-       opacity-0 group-hover:opacity-100 
-       transition-opacity 
-       w-[calc(100vw-2rem)] sm:w-auto max-w-sm 
-       text-center z-50
-     ">
-       Microphone access denied. Check browser settings.
-     </div>
-     
-     
-      )}
-    </motion.button>
+    <div className="hidden sm:block">
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={toggleListening}
+        className={cn(
+          "p-2 mb-3 rounded-full transition-colors relative group",
+          isListening 
+            ? "bg-red-500/20 text-red-500" 
+            : "bg-dark-300/50 text-gray-400 hover:text-primary-500"
+        )}
+      >
+        {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+        
+        {/* Tooltip */}
+        {permissionState === 'denied' && (
+          <div className="
+            absolute bottom-full 
+            left-1 sm:left-1/2 sm:-translate-x-1/2 
+            mb-2 px-3 py-1 
+            bg-dark-300 text-white text-xs rounded-md 
+            opacity-0 group-hover:opacity-100 
+            transition-opacity 
+            w-[calc(100vw-2rem)] sm:w-auto max-w-sm 
+            text-center z-50
+          ">
+            Microphone access denied. Check browser settings.
+          </div>
+        )}
+      </motion.button>
+    </div>
   );
+  
 };
 
 export default VoiceInput;
