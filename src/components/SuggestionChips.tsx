@@ -28,8 +28,8 @@ const SuggestionChips: React.FC<SuggestionChipsProps> = ({ large = false }) => {
   const suggestions = [
     "Tell me about yourself",
     "Education",
-    "Download your resume",
-    "What are your technical skills & projects?",
+    "Technical skills & projects",
+    "Your resume",
     "Connect with me"
   ];
 

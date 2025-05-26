@@ -20,13 +20,25 @@ const ChatInterface: React.FC = () => {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-md bg-dark-100/95 z-10"
+        className="mt-28 sm:mt-0 flex items-center justify-between p-4 border-b border-dark-300/50 backdrop-blur-md bg-dark-100/95 z-10"
       >
+
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
             <MessageSquare size={20} className="text-white" />
           </div>
-          <h1 className="text-xl font-semibold text-white">Hi, I'm Sudarshan! 👋</h1>
+          <h1 className="text-xl font-semibold text-white flex items-center">
+            Hi, I'm Sudarshan!
+            <span
+              className="inline-block transform scale-[0.75] sm:scale-100"
+              role="img"
+              aria-label="wave"
+            >
+              👋
+            </span>
+          </h1>
+
+
         </div>
         <div className="text-sm text-gray-400">Software Engineer</div>
       </motion.header>
