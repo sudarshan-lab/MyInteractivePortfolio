@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, User, X } from 'lucide-react';
+import { Mail, User, X, MessageSquare } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 interface UserAuthModalProps {
