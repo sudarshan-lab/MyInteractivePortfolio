@@ -66,13 +66,17 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [privateKey, setPrivateKey] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPrivateKeyModal, setShowPrivateKeyModal] = useState(false);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(true);
+  const [userData, setUserData] = useState<UserData | null>(() => {
+    const saved = localStorage.getItem('userData');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [showAuthModal, setShowAuthModal] = useState(!localStorage.getItem('userData'));
   const [showPrivateMessages, setShowPrivateMessages] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
       setTimeout(() => {
         setMessages(DUMMY_MESSAGES);
       }, 1000);
@@ -125,7 +129,9 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   const handleUserAuth = (name: string, email: string) => {
-    setUserData({ name, email });
+    const newUserData = { name, email };
+    setUserData(newUserData);
+    localStorage.setItem('userData', JSON.stringify(newUserData));
     setShowAuthModal(false);
   };
 
@@ -217,6 +223,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           >
             <Lock size={16} />
             {isAuthenticated ? 'Authenticated' : 'Private Access'}
+            <Tooltip content={isAuthenticated ? "Already Authenticated" : "Access Private Messages"} />
           </motion.button>
         </div>
       </motion.div>
@@ -349,7 +356,12 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 type="password"
                 value={privateKey}
                 onChange={(e) => setPrivateKey(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 placeholder:text-gray-500"
+                className={cn(
+                  "w-full bg-white/5 border border-white/10 rounded-lg",
+                  "px-4 py-2 mb-4",
+                  "focus:outline-none focus:ring-2 focus:ring-primary-500/50",
+                  "placeholder:text-gray-500 text-gray-200"
+                )}
                 placeholder="Enter private key..."
               />
               <div className="flex justify-end gap-2">
