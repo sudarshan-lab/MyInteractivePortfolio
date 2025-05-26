@@ -217,7 +217,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 ) : (
                   <EyeOff size={20} className="text-gray-400" />
                 )}
-                <Tooltip content={showPrivateMessages ? "Hide Private Messages" : "Show Private Messages"} />
               </motion.button>
             )}
             <motion.button
