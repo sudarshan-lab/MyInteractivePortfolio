@@ -6,22 +6,41 @@ import { useChat } from '../context/ChatContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import DiscussionPage from './DiscussionPage';
 import { MessageSquare, Users } from 'lucide-react';
+import TutorialOverlay from './TutorialOverlay';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [showDiscussions, setShowDiscussions] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => !localStorage.getItem('tutorialShown'));
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  const tutorialSteps = [
+    {
+      target: '[data-tutorial="header"]',
+      content: "Click here to restart our conversation anytime you want to begin fresh!",
+      position: 'bottom' as const,
+    },
+    {
+      target: '[data-tutorial="discussions"]',
+      content: "Click here to join discussions and share your thoughts with others",
+      position: 'bottom' as const,
+    },
+    {
+      target: '[data-tutorial="suggestions"]',
+      content: "Try these suggestions or feel free to ask me anything you'd like to know!",
+      position: 'top' as const,
+    },
+  ];
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    if (showTutorial) {
-      localStorage.setItem('tutorialShown', 'true');
-    }
-  }, [showTutorial]);
+  const handleTutorialComplete = () => {
+    setShowTutorial(false);
+    localStorage.setItem('tutorialShown', 'true');
+  };
 
   const handleRefresh = () => {
     localStorage.clear();
@@ -44,7 +63,11 @@ const ChatInterface: React.FC = () => {
             z-10
           "
         >
-          <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group relative" onClick={handleRefresh}>
+          <div 
+            data-tutorial="header"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group relative" 
+            onClick={handleRefresh}
+          >
             <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
               <img 
                 src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100" 
@@ -62,26 +85,15 @@ const ChatInterface: React.FC = () => {
                 👋
               </span>
             </h1>
-            {showTutorial && (
-              <div className="absolute top-full left-0 mt-2 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
-                Click here to restart from beginning
-                <div className="absolute -top-2 left-4 w-4 h-4 bg-dark-200 transform rotate-45" />
-              </div>
-            )}
           </div>
           <div className="flex items-center gap-4">
             <div 
-              className="text-xs sm:text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2 group relative"
+              data-tutorial="discussions"
+              className="text-xs sm:text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2"
               onClick={() => setShowDiscussions(true)}
             >
               <Users size={16} />
               Software Engineer
-              {showTutorial && (
-                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
-                  Click for suggestions or discussions
-                  <div className="absolute -top-2 right-4 w-4 h-4 bg-dark-200 transform rotate-45" />
-                </div>
-              )}
             </div>
           </div>
         </motion.header>
@@ -102,14 +114,8 @@ const ChatInterface: React.FC = () => {
                 I'd love to tell you about my experience in software engineering, my projects, and skills.
                 Feel free to ask me anything or try one of the suggestions below!
               </p>
-              <div className="relative">
+              <div data-tutorial="suggestions">
                 <SuggestionChips large />
-                {showTutorial && (
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
-                    Try these suggestions or ask anything
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-dark-200 transform rotate-45" />
-                  </div>
-                )}
               </div>
             </motion.div>
           ) : (
@@ -133,6 +139,17 @@ const ChatInterface: React.FC = () => {
       <AnimatePresence>
         {showDiscussions && (
           <DiscussionPage onClose={() => setShowDiscussions(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showTutorial && (
+          <TutorialOverlay
+            currentStep={tutorialStep}
+            steps={tutorialSteps}
+            onNext={() => setTutorialStep(prev => prev + 1)}
+            onComplete={handleTutorialComplete}
+          />
         )}
       </AnimatePresence>
     </>
