@@ -6,6 +6,7 @@ import UserAuthModal from './UserAuthModal';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils'; 
 import Notification from './Notification';
+import TutorialOverlay from './TutorialOverlay';
 
 interface Message {
   id: string;
@@ -49,6 +50,30 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showTutorial, setShowTutorial] = useState(() => !localStorage.getItem('discussionTutorialShown'));
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  const tutorialSteps = [
+    {
+      target: '[data-tutorial="message-type"]',
+      content: "Toggle between sending messages to everyone or privately to me",
+      position: 'top' as const,
+    },
+    {
+      target: '[data-tutorial="private-access"]',
+      content: "Access private messages with a special passcode (only for Sudarshan)",
+      position: 'left' as const,
+    },
+    {
+      target: '[data-tutorial="view-private"]',
+      content: "Toggle visibility of private messages once authenticated",
+      position: 'left' as const,
+    },
+  ];
+
+  const handleTutorialComplete = () => {
+    setShowTutorial(false);
+    localStorage.setItem('discussionTutorialShown', 'true');
+  };
 
   useEffect(() => {
     if (showTutorial) {
@@ -227,6 +252,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="flex items-center gap-1 sm:gap-3 mt-1 sm:mt-0">
             {isAuthenticated && (
               <motion.button
+                data-tutorial="view-private"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowPrivateMessages(!showPrivateMessages)}
@@ -237,15 +263,10 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 ) : (
                   <EyeOff size={15} className="text-gray-400" />
                 )}
-                {showTutorial && (
-                  <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-dark-200 rounded-lg text-xs text-white whitespace-nowrap z-20">
-                    View privately sent messages
-                    <div className="absolute -bottom-2 right-4 w-4 h-4 bg-dark-200 transform rotate-45" />
-                  </div>
-                )}
               </motion.button>
             )}
             <motion.button
+              data-tutorial="private-access"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowPrivateKeyModal(true)}
@@ -258,12 +279,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <Lock size={12} />
               {isAuthenticated ? 'Authenticated' : 'Private Access'}
-              {showTutorial && !isAuthenticated && (
-                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-dark-200 rounded-lg text-xs text-white whitespace-nowrap z-20">
-                  Only works for Sudarshan who got the passcode
-                  <div className="absolute -bottom-2 right-4 w-4 h-4 bg-dark-200 transform rotate-45" />
-                </div>
-              )}
             </motion.button>
           </div>
         </motion.div>
@@ -349,6 +364,7 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         >
           <div className="flex gap-2">
             <motion.button
+              data-tutorial="message-type"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsPrivate(!isPrivate)}
@@ -360,12 +376,6 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               )}
             >
               {isPrivate ? <Lock size={20} /> : <Users size={20} />}
-              {showTutorial && (
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-dark-200 rounded-lg text-xs text-white whitespace-nowrap z-20">
-                  {isPrivate ? 'Send to me privately' : 'Send to everyone'}
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-dark-200 transform rotate-45" />
-                </div>
-              )}
             </motion.button>
             <textarea
               value={newMessage}
@@ -455,6 +465,17 @@ const DiscussionPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               type={notification.type}
               message={notification.message}
               onClose={() => setNotification(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showTutorial && (
+            <TutorialOverlay
+              currentStep={tutorialStep}
+              steps={tutorialSteps}
+              onNext={() => setTutorialStep(prev => prev + 1)}
+              onComplete={handleTutorialComplete}
             />
           )}
         </AnimatePresence>
