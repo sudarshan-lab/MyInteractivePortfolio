@@ -146,13 +146,6 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           left: position.left,
         }}
       >
-        <button
-          onClick={onComplete}
-          className="absolute top-2 right-2 p-1 hover:bg-white/5 rounded-full transition-colors"
-        >
-          <X size={16} className="text-gray-400" />
-        </button>
-
         <p className="text-white mb-4">{step.content}</p>
 
         <div className="flex items-center justify-between">

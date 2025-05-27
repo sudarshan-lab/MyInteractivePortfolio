@@ -23,12 +23,12 @@ const ChatInterface: React.FC = () => {
     },
     {
       target: '[data-tutorial="discussions"]',
-      content: "Click here to join discussions and share your thoughts with others",
+      content: "Join the discussion and share valuable insights to support my development!",
       position: 'bottom' as const,
     },
     {
       target: '[data-tutorial="suggestions"]',
-      content: "Try these suggestions or feel free to ask me anything you'd like to know!",
+      content: "Try these quick suggestions or feel free to ask me anything you'd like to know!",
       position: 'top' as const,
     },
   ];
