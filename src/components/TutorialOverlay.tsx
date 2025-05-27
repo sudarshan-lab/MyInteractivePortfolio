@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -21,87 +21,106 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   onNext,
   onComplete,
 }) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
   const step = steps[currentStep];
   if (!step) return null;
+
+  const calculatePosition = () => {
+    const targetElement = document.querySelector(step.target);
+    if (!targetElement) return null;
+
+    const rect = targetElement.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const overlayWidth = viewportWidth < 640 ? Math.min(280, viewportWidth - 32) : 300;
+    const overlayHeight = 120;
+    const padding = 16;
+
+    let newPosition = { top: 0, left: 0 };
+
+    const calculateForPosition = (pos: 'top' | 'bottom' | 'left' | 'right') => {
+      switch (pos) {
+        case 'top':
+          return {
+            top: rect.top - overlayHeight - padding,
+            left: Math.min(
+              Math.max(padding, rect.left + (rect.width / 2) - (overlayWidth / 2)),
+              viewportWidth - overlayWidth - padding
+            ),
+          };
+        case 'bottom':
+          return {
+            top: rect.bottom + padding,
+            left: Math.min(
+              Math.max(padding, rect.left + (rect.width / 2) - (overlayWidth / 2)),
+              viewportWidth - overlayWidth - padding
+            ),
+          };
+        case 'left':
+          return {
+            top: Math.min(
+              Math.max(padding, rect.top + (rect.height / 2) - (overlayHeight / 2)),
+              viewportHeight - overlayHeight - padding
+            ),
+            left: rect.left - overlayWidth - padding,
+          };
+        case 'right':
+          return {
+            top: Math.min(
+              Math.max(padding, rect.top + (rect.height / 2) - (overlayHeight / 2)),
+              viewportHeight - overlayHeight - padding
+            ),
+            left: rect.right + padding,
+          };
+      }
+    };
+
+    // Try original position first
+    newPosition = calculateForPosition(step.position);
+
+    // Check if overlay would be cut off and adjust if necessary
+    if (step.position === 'top' && newPosition.top < padding) {
+      newPosition = calculateForPosition('bottom');
+    } else if (step.position === 'bottom' && newPosition.top + overlayHeight > viewportHeight - padding) {
+      newPosition = calculateForPosition('top');
+    } else if (step.position === 'left' && newPosition.left < padding) {
+      newPosition = calculateForPosition('right');
+    } else if (step.position === 'right' && newPosition.left + overlayWidth > viewportWidth - padding) {
+      newPosition = calculateForPosition('left');
+    }
+
+    // Final boundary check
+    newPosition.left = Math.max(padding, Math.min(newPosition.left, viewportWidth - overlayWidth - padding));
+    newPosition.top = Math.max(padding, Math.min(newPosition.top, viewportHeight - overlayHeight - padding));
+
+    return newPosition;
+  };
+
+  useEffect(() => {
+    const updatePosition = () => {
+      const newPosition = calculatePosition();
+      if (newPosition) {
+        setPosition(newPosition);
+      }
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
+    };
+  }, [currentStep, step.position]);
 
   const targetElement = document.querySelector(step.target);
   if (!targetElement) return null;
 
   const rect = targetElement.getBoundingClientRect();
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-
-  const getOverlayPosition = () => {
-    const overlayWidth = 300;
-    const overlayHeight = 120;
-    const padding = 16;
-    let position = { top: 0, left: 0 };
-
-    switch (step.position) {
-      case 'top':
-        position = {
-          top: rect.top - overlayHeight - padding,
-          left: rect.left + (rect.width / 2) - (overlayWidth / 2),
-        };
-        // Adjust if too close to top
-        if (position.top < padding) {
-          return getOverlayPosition('bottom');
-        }
-        break;
-      case 'bottom':
-        position = {
-          top: rect.bottom + padding,
-          left: rect.left + (rect.width / 2) - (overlayWidth / 2),
-        };
-        // Adjust if too close to bottom
-        if (position.top + overlayHeight > viewportHeight - padding) {
-          return getOverlayPosition('top');
-        }
-        break;
-      case 'left':
-        position = {
-          top: rect.top + (rect.height / 2) - (overlayHeight / 2),
-          left: rect.left - overlayWidth - padding,
-        };
-        // Adjust if too close to left
-        if (position.left < padding) {
-          return getOverlayPosition('right');
-        }
-        break;
-      case 'right':
-        position = {
-          top: rect.top + (rect.height / 2) - (overlayHeight / 2),
-          left: rect.right + padding,
-        };
-        // Adjust if too close to right
-        if (position.left + overlayWidth > viewportWidth - padding) {
-          return getOverlayPosition('left');
-        }
-        break;
-    }
-
-    // Ensure overlay stays within viewport bounds
-    position.left = Math.max(padding, Math.min(position.left, viewportWidth - overlayWidth - padding));
-    position.top = Math.max(padding, Math.min(position.top, viewportHeight - overlayHeight - padding));
-
-    return position;
-  };
-
-  const position = getOverlayPosition();
-
-  useEffect(() => {
-    const handleResize = () => {
-      // Force re-render on resize to recalculate positions
-      onNext();
-      onNext();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [onNext]);
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 touch-none">
       <div className="absolute inset-0 bg-black/50" />
       
       <div 
@@ -121,7 +140,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="absolute bg-dark-200 rounded-lg p-4 shadow-xl border border-primary-500/30 w-[300px]"
+        className="absolute bg-dark-200 rounded-lg p-4 shadow-xl border border-primary-500/30 w-[280px] sm:w-[300px]"
         style={{
           top: position.top,
           left: position.left,
@@ -152,7 +171,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
           <button
             onClick={currentStep === steps.length - 1 ? onComplete : onNext}
-            className="px-4 py-1 bg-primary-500 hover:bg-primary-600 rounded-full text-sm text-white transition-colors"
+            className="px-4 py-2 bg-primary-500 hover:bg-primary-600 rounded-full text-sm text-white transition-colors"
           >
             {currentStep === steps.length - 1 ? 'Got it!' : 'Next'}
           </button>
