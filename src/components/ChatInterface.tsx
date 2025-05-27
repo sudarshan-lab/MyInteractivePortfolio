@@ -11,10 +11,17 @@ const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [showDiscussions, setShowDiscussions] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(() => !localStorage.getItem('tutorialShown'));
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (showTutorial) {
+      localStorage.setItem('tutorialShown', 'true');
+    }
+  }, [showTutorial]);
 
   const handleRefresh = () => {
     localStorage.clear();
@@ -24,55 +31,60 @@ const ChatInterface: React.FC = () => {
   return (
     <>
       <div className="flex flex-col h-screen">
-       <motion.header 
-  initial={{ y: -20, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ duration: 0.5 }}
-  className="
-    mt-28 sm:mt-0
-    flex flex-wrap items-center justify-between
-    p-3 sm:p-4
-    border-b border-dark-300/50
-    backdrop-blur-md bg-dark-100/95
-    z-10
-  "
->
-  <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={handleRefresh}>
-    <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
-      <MessageSquare size={18} className="text-white" />
-    </div>
-    <h1 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-1">
-      Hi, I’m Sudarshan!
-      <span
-        className="inline-block transform scale-90 sm:scale-100"
-        role="img"
-        aria-label="wave"
-      >
-        👋
-      </span>
-    </h1>
-  </div>
-  <div className="flex items-center gap-4">
+        <motion.header 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="
+            mt-28 sm:mt-0
+            flex flex-wrap items-center justify-between
+            p-3 sm:p-4
+            border-b border-dark-300/50
+            backdrop-blur-md bg-dark-100/95
+            z-10
+          "
+        >
+          <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group relative" onClick={handleRefresh}>
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
+              <img 
+                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100" 
+                alt="Avatar" 
+                className="w-[18px] h-[18px] rounded-full object-cover"
+              />
+            </div>
+            <h1 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-1">
+              Hi, I'm Sudarshan!
+              <span
+                className="inline-block transform scale-90 sm:scale-100"
+                role="img"
+                aria-label="wave"
+              >
+                👋
+              </span>
+            </h1>
+            {showTutorial && (
+              <div className="absolute top-full left-0 mt-2 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
+                Click here to restart from beginning
+                <div className="absolute -top-2 left-4 w-4 h-4 bg-dark-200 transform rotate-45" />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
             <div 
-              className=" text-xs sm:text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2"
+              className="text-xs sm:text-sm text-gray-400 cursor-pointer hover:text-primary-400 transition-colors flex items-center gap-2 group relative"
               onClick={() => setShowDiscussions(true)}
             >
-              <div className="group relative flex items-center">
-    <Users size={16} />
-    <span className="
-      absolute top-full left-1/2 -translate-x-1/2 mt-2
-      px-2 py-1 rounded bg-dark-200 text-xs text-white whitespace-nowrap
-      opacity-0 group-hover:opacity-100 transition-opacity z-20
-      pointer-events-none
-    ">
-      Discussions
-    </span>
-  </div>
+              <Users size={16} />
               Software Engineer
+              {showTutorial && (
+                <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
+                  Click for suggestions or discussions
+                  <div className="absolute -top-2 right-4 w-4 h-4 bg-dark-200 transform rotate-45" />
+                </div>
+              )}
             </div>
-            </div>
-</motion.header>
-
+          </div>
+        </motion.header>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 ? (
@@ -90,7 +102,15 @@ const ChatInterface: React.FC = () => {
                 I'd love to tell you about my experience in software engineering, my projects, and skills.
                 Feel free to ask me anything or try one of the suggestions below!
               </p>
-              <SuggestionChips large />
+              <div className="relative">
+                <SuggestionChips large />
+                {showTutorial && (
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 px-3 py-2 bg-dark-200 rounded-lg text-sm text-white whitespace-nowrap z-20">
+                    Try these suggestions or ask anything
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-dark-200 transform rotate-45" />
+                  </div>
+                )}
+              </div>
             </motion.div>
           ) : (
             <>
