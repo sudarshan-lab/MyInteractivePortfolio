@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DiscussionPage from './DiscussionPage';
 import { MessageSquare, Users } from 'lucide-react';
 import TutorialOverlay from './TutorialOverlay';
+import avatar from '../data/avatar.png';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
@@ -79,11 +80,11 @@ const ChatInterface: React.FC = () => {
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group relative" 
             onClick={handleRefresh}
           >
-            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-lg overflow-hidden">
               <img 
-                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100" 
-                alt="Avatar" 
-                className="w-[18px] h-[18px] rounded-full object-cover"
+                src={avatar}
+                alt="Avatar"
+                className="w-full h-full object-cover"
               />
             </div>
             <h1 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-1">
