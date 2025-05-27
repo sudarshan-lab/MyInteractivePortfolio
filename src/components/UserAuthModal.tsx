@@ -83,7 +83,7 @@ const UserAuthModal: React.FC<UserAuthModalProps> = ({ onClose, onSubmit }) => {
             transition={{ delay: 0.1 }}
             className="text-gray-400 mb-6"
           >
-            Connect with the me and share your thoughts & suggestions
+            Connect with me and share your thoughts & suggestions
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
