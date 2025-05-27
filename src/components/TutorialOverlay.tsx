@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -28,37 +28,80 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   if (!targetElement) return null;
 
   const rect = targetElement.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   const getOverlayPosition = () => {
-    const padding = 8;
+    const overlayWidth = 300;
+    const overlayHeight = 120;
+    const padding = 16;
+    let position = { top: 0, left: 0 };
+
     switch (step.position) {
       case 'top':
-        return {
-          top: rect.top - 80,
-          left: rect.left + (rect.width / 2) - 150,
+        position = {
+          top: rect.top - overlayHeight - padding,
+          left: rect.left + (rect.width / 2) - (overlayWidth / 2),
         };
+        // Adjust if too close to top
+        if (position.top < padding) {
+          return getOverlayPosition('bottom');
+        }
+        break;
       case 'bottom':
-        return {
+        position = {
           top: rect.bottom + padding,
-          left: rect.left + (rect.width / 2) - 150,
+          left: rect.left + (rect.width / 2) - (overlayWidth / 2),
         };
+        // Adjust if too close to bottom
+        if (position.top + overlayHeight > viewportHeight - padding) {
+          return getOverlayPosition('top');
+        }
+        break;
       case 'left':
-        return {
-          top: rect.top + (rect.height / 2) - 40,
-          left: rect.left - 320,
+        position = {
+          top: rect.top + (rect.height / 2) - (overlayHeight / 2),
+          left: rect.left - overlayWidth - padding,
         };
+        // Adjust if too close to left
+        if (position.left < padding) {
+          return getOverlayPosition('right');
+        }
+        break;
       case 'right':
-        return {
-          top: rect.top + (rect.height / 2) - 40,
+        position = {
+          top: rect.top + (rect.height / 2) - (overlayHeight / 2),
           left: rect.right + padding,
         };
+        // Adjust if too close to right
+        if (position.left + overlayWidth > viewportWidth - padding) {
+          return getOverlayPosition('left');
+        }
+        break;
     }
+
+    // Ensure overlay stays within viewport bounds
+    position.left = Math.max(padding, Math.min(position.left, viewportWidth - overlayWidth - padding));
+    position.top = Math.max(padding, Math.min(position.top, viewportHeight - overlayHeight - padding));
+
+    return position;
   };
 
   const position = getOverlayPosition();
 
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-render on resize to recalculate positions
+      onNext();
+      onNext();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [onNext]);
+
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none">
+    <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/50" />
       
       <div 
@@ -74,10 +117,11 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="absolute pointer-events-auto bg-dark-200 rounded-lg p-4 shadow-xl border border-primary-500/30 w-[300px]"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className="absolute bg-dark-200 rounded-lg p-4 shadow-xl border border-primary-500/30 w-[300px]"
         style={{
           top: position.top,
           left: position.left,

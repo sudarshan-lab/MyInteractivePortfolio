@@ -12,7 +12,7 @@ const ChatInterface: React.FC = () => {
   const { messages, loading } = useChat();
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const [showDiscussions, setShowDiscussions] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(() => !localStorage.getItem('tutorialShown'));
+  const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
 
   const tutorialSteps = [
@@ -32,6 +32,17 @@ const ChatInterface: React.FC = () => {
       position: 'top' as const,
     },
   ];
+
+  useEffect(() => {
+    // Show tutorial after a short delay on first visit
+    const timer = setTimeout(() => {
+      if (!localStorage.getItem('tutorialShown')) {
+        setShowTutorial(true);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
